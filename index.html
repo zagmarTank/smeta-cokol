@@ -65,6 +65,7 @@
         .btn-primary { background: #c41e3a; color: #fff; }
         .btn-secondary { background: #333; color: #fff; margin-top: 8px; }
         .btn-danger { background: #ff4444; color: #fff; padding: 8px; font-size: 12px; width: auto; }
+        .btn-share { background: #25d366; color: #fff; margin-top: 10px; }
 
         .surface-item {
             background: #fafafa;
@@ -253,11 +254,35 @@
             gap: 10px;
             margin-bottom: 8px;
             font-size: 13px;
+            padding: 6px;
+            background: #fafafa;
+            border-radius: 8px;
         }
         .toggle-row input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             accent-color: #c41e3a;
+            flex-shrink: 0;
+        }
+        .toggle-row label {
+            flex: 1;
+        }
+        .toggle-row .price-inline {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .toggle-row .price-inline input {
+            width: 60px;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: right;
+        }
+        .toggle-row .price-inline span {
+            font-size: 11px;
+            color: #888;
         }
 
         .fact-check {
@@ -280,22 +305,24 @@
         .fact-check td {
             padding: 2px 4px;
         }
+
+        .share-text {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-top: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📐 СМЕТА ЦОКОЛЬ / ФАСАД</h1>
-
-        <!-- ФАКТИЧЕСКАЯ ПРОВЕРКА -->
-        <div class="fact-check">
-            <h4>✓ Проверка по факту: Олег К. Осиново</h4>
-            <table>
-                <tr><td>Периметр:</td><td>44 п.м.</td><td>Высота:</td><td>50 см</td></tr>
-                <tr><td>СТ77 факт:</td><td>6,5 ведра 25кг</td><td>Площадь:</td><td>22 м²</td></tr>
-                <tr><td>Расход СТ77:</td><td colspan="3"><b>3,5 м²/ведро 25кг</b> · Запас: +1 ведро</td></tr>
-                <tr><td>Расход СТ174:</td><td colspan="3"><b>7,5 м²/ведро 25кг</b> · Запас: +1 ведро</td></tr>
-            </table>
-        </div>
 
         <!-- КЛИЕНТ -->
         <div class="card">
@@ -341,234 +368,243 @@
             <button class="btn btn-primary" onclick="addSurface()">+ Добавить плоскость</button>
         </div>
 
-        <!-- ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ -->
+        <!-- РАБОТЫ — ВСЕ С ГАЛОЧКАМИ -->
         <div class="card">
-            <h2>Дополнительно</h2>
+            <h2>Работы (₽/п.м.)</h2>
+
             <div class="toggle-row">
-                <input type="checkbox" id="needDelivery" onchange="calculateAll()">
-                <label for="needDelivery">Доставка (3 800 ₽)</label>
+                <input type="checkbox" id="workCleanCheck" checked onchange="calculateAll()">
+                <label for="workCleanCheck">Очистка + грунтовка</label>
+                <div class="price-inline">
+                    <input type="number" id="priceClean" value="100" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
+
             <div class="toggle-row">
-                <input type="checkbox" id="useSt84" checked onchange="calculateAll()">
-                <label for="useSt84">Клей СТ84 (полиуретановый) — как в смете Осиново</label>
-            </div>
-            <div class="note">Счёт №1431: СТ84 — 790 ₽/шт (800 мл), 4 баллона на 48 листов</div>
-        </div>
-
-        <!-- РАБОТЫ -->
-        <div class="card">
-            <h2>Работы (₽/п.м.) — редактируемо</h2>
-            <div class="price-input">
-                <label>Очистка + грунтовка</label>
-                <input type="number" id="priceClean" value="100" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Выравнивание</label>
-                <input type="number" id="priceLevel" value="200" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Гидрофобизация</label>
-                <input type="number" id="priceHydro" value="400" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Монтаж ЭППС</label>
-                <input type="number" id="priceEpp" value="800" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Угловые профили</label>
-                <input type="number" id="priceProfile" value="200" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Армирование</label>
-                <input type="number" id="priceArm" value="1000" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Кварцевая грунтовка</label>
-                <input type="number" id="priceQuartz" value="100" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-            <div class="price-input">
-                <label>Мозаика / штукатурка</label>
-                <input type="number" id="priceFinish" value="1500" onchange="calculateAll()">
-                <span class="unit">₽/п.м.</span>
-            </div>
-        </div>
-
-        <!-- ЦЕНЫ МАТЕРИАЛОВ -->
-        <div class="card">
-            <h2>Цены материалов (₽) — счёт №1431</h2>
-
-            <div class="section-title">Теплоизоляция</div>
-            <div class="price-input">
-                <label>ЭППС ГРАФИТ XPS (упак. 8 листов, 5,4752 м²)</label>
-                <input type="number" id="priceEppPack" value="1990" onchange="calculateAll()">
-                <span class="unit">₽/упак</span>
-            </div>
-            <div class="note">Лист 50×580×1180 мм, 0,27376 м³/упак</div>
-
-            <div class="section-title">Клеевые смеси</div>
-            <div class="price-input">
-                <label>СТ84 полиуретановый клей 800 мл</label>
-                <input type="number" id="priceSt84" value="790" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
-            </div>
-            <div class="note">Факт: 4 баллона на 48 листов = 12 листов/баллон</div>
-            <div class="price-input">
-                <label>СТ85 штукатурно-клеевая 25 кг</label>
-                <input type="number" id="priceSt85" value="850" onchange="calculateAll()">
-                <span class="unit">₽/меш</span>
+                <input type="checkbox" id="workLevelCheck" checked onchange="calculateAll()">
+                <label for="workLevelCheck">Выравнивание</label>
+                <div class="price-inline">
+                    <input type="number" id="priceLevel" value="200" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
 
-            <div class="section-title">Грунтовки</div>
-            <div class="price-input">
-                <label>СТ16 грунтовка 10 л / 16 кг</label>
-                <input type="number" id="priceSt16" value="1850" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
-            </div>
-            <div class="price-input">
-                <label>СТ17 PRO грунтовка 10 л</label>
-                <input type="number" id="priceSt17" value="1010" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+            <div class="toggle-row">
+                <input type="checkbox" id="workHydroCheck" checked onchange="calculateAll()">
+                <label for="workHydroCheck">Гидрофобизация</label>
+                <div class="price-inline">
+                    <input type="number" id="priceHydro" value="400" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
 
-            <div class="section-title">Армирование и профили</div>
-            <div class="price-input">
-                <label>Сетка Крепикс 2000 4×4,2 (1×50 м, 158г/м²)</label>
-                <input type="number" id="priceMesh" value="2700" onchange="calculateAll()">
-                <span class="unit">₽/рул</span>
-            </div>
-            <div class="price-input">
-                <label>Угловой профиль ПВХ 10×15, L=2,5 м</label>
-                <input type="number" id="priceCornerProf" value="90" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
-            </div>
-            <div class="price-input">
-                <label>Демпферная лента 0,15×10 м, 10 мм</label>
-                <input type="number" id="priceDempfer" value="360" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+            <div class="toggle-row">
+                <input type="checkbox" id="workEppCheck" checked onchange="calculateAll()">
+                <label for="workEppCheck">Монтаж ЭППС</label>
+                <div class="price-inline">
+                    <input type="number" id="priceEpp" value="800" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
 
-            <div class="section-title">Финишный слой</div>
-            <div class="price-input">
-                <label>СТ77 мозаичная 25 кг</label>
-                <input type="number" id="priceSt77" value="11500" onchange="calculateAll()">
-                <span class="unit">₽/вед</span>
+            <div class="toggle-row">
+                <input type="checkbox" id="workProfileCheck" checked onchange="calculateAll()">
+                <label for="workProfileCheck">Угловые профили</label>
+                <div class="price-inline">
+                    <input type="number" id="priceProfile" value="200" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
-            <div class="note">Расход: <b>1 ведро 25кг = 3,5 м²</b> · Запас: +1 ведро</div>
 
-            <div class="price-input">
-                <label>СТ174 силикатно-силиконовая 25 кг (базовая)</label>
-                <input type="number" id="priceSt174" value="2800" onchange="calculateAll()">
-                <span class="unit">₽/вед</span>
+            <div class="toggle-row">
+                <input type="checkbox" id="workArmCheck" checked onchange="calculateAll()">
+                <label for="workArmCheck">Армирование</label>
+                <div class="price-inline">
+                    <input type="number" id="priceArm" value="1000" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
-            <div class="note">Расход: <b>1 ведро 25кг = 7,5 м²</b> · Запас: +1 ведро · Цена = цвет</div>
 
-            <div class="section-title">Крепёж</div>
-            <div class="price-input">
-                <label>Дюбель-гвоздь 6×60 (если без СТ84)</label>
-                <input type="number" id="priceDubel" value="25" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+            <div class="toggle-row">
+                <input type="checkbox" id="workQuartzCheck" checked onchange="calculateAll()">
+                <label for="workQuartzCheck">Кварцевая грунтовка</label>
+                <div class="price-inline">
+                    <input type="number" id="priceQuartz" value="100" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="workFinishCheck" checked onchange="calculateAll()">
+                <label for="workFinishCheck">Мозаика / штукатурка</label>
+                <div class="price-inline">
+                    <input type="number" id="priceFinish" value="1500" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
             </div>
         </div>
 
-        <!-- РАСХОДНИКИ -->
+        <!-- МАТЕРИАЛЫ — ВСЕ С ГАЛОЧКАМИ -->
         <div class="card">
-            <h2>Расходники на объект — счёт №1431</h2>
-            <div class="price-input">
-                <label>Ведро строит. 16 л (кол-во)</label>
-                <input type="number" id="qtyBucket" value="2" onchange="calculateAll()">
-                <span class="unit">шт</span>
+            <h2>Материалы</h2>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matEppCheck" checked onchange="calculateAll()">
+                <label for="matEppCheck">ЭППС ГРАФИТ XPS (упак. 8 листов)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceEppPack" value="1990" onchange="calculateAll()">
+                    <span>₽/упак</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Ведро строит. 16 л (цена)</label>
-                <input type="number" id="priceBucket" value="147" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matSt85Check" checked onchange="calculateAll()">
+                <label for="matSt85Check">СТ85 штукатурно-клеевая 25 кг</label>
+                <div class="price-inline">
+                    <input type="number" id="priceSt85" value="850" onchange="calculateAll()">
+                    <span>₽/меш</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Шпатель 100 мм (кол-во)</label>
-                <input type="number" id="qtySpatula" value="2" onchange="calculateAll()">
-                <span class="unit">шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matMeshCheck" checked onchange="calculateAll()">
+                <label for="matMeshCheck">Сетка Крепикс 2000 (1×50 м)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceMesh" value="2700" onchange="calculateAll()">
+                    <span>₽/рул</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Шпатель 100 мм (цена)</label>
-                <input type="number" id="priceSpatula" value="44" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matCornerCheck" checked onchange="calculateAll()">
+                <label for="matCornerCheck">Угловые профили ПВХ 2,5 м</label>
+                <div class="price-inline">
+                    <input type="number" id="priceCornerProf" value="90" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Валик 240 мм полиакрил (кол-во)</label>
-                <input type="number" id="qtyRoller" value="1" onchange="calculateAll()">
-                <span class="unit">шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matDempferCheck" checked onchange="calculateAll()">
+                <label for="matDempferCheck">Демпферная лента 10 м</label>
+                <div class="price-inline">
+                    <input type="number" id="priceDempfer" value="360" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Валик 240 мм полиакрил (цена)</label>
-                <input type="number" id="priceRoller" value="218" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matSt17Check" checked onchange="calculateAll()">
+                <label for="matSt17Check">СТ17 PRO грунтовка 10 л</label>
+                <div class="price-inline">
+                    <input type="number" id="priceSt17" value="1010" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Кисть макловица 50×150 мм (кол-во)</label>
-                <input type="number" id="qtyBrush" value="1" onchange="calculateAll()">
-                <span class="unit">шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matSt16Check" checked onchange="calculateAll()">
+                <label for="matSt16Check">СТ16 грунтовка 10 л / 16 кг</label>
+                <div class="price-inline">
+                    <input type="number" id="priceSt16" value="1850" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Кисть макловица 50×150 мм (цена)</label>
-                <input type="number" id="priceBrush" value="270" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matFinishCheck" checked onchange="calculateAll()">
+                <label for="matFinishCheck" id="matFinishLabel">СТ77 мозаичная 25 кг</label>
+                <div class="price-inline">
+                    <input type="number" id="priceSt77" value="11500" onchange="calculateAll()">
+                    <span>₽/вед</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Пистолет для пены (кол-во)</label>
-                <input type="number" id="qtyGun" value="1" onchange="calculateAll()">
-                <span class="unit">шт</span>
+        </div>
+
+        <!-- РАСХОДНИКИ — С ГАЛОЧКАМИ -->
+        <div class="card">
+            <h2>Расходники</h2>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consBucketCheck" checked onchange="calculateAll()">
+                <label for="consBucketCheck">Ведро строит. 16 л (2 шт)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceBucket" value="147" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Пистолет для пены (цена)</label>
-                <input type="number" id="priceGun" value="374" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consSpatulaCheck" checked onchange="calculateAll()">
+                <label for="consSpatulaCheck">Шпатель 100 мм (2 шт)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceSpatula" value="44" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Очиститель пены 500 мл (кол-во)</label>
-                <input type="number" id="qtyCleaner" value="1" onchange="calculateAll()">
-                <span class="unit">шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consRollerCheck" checked onchange="calculateAll()">
+                <label for="consRollerCheck">Валик 240 мм полиакрил</label>
+                <div class="price-inline">
+                    <input type="number" id="priceRoller" value="218" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Очиститель пены 500 мл (цена)</label>
-                <input type="number" id="priceCleaner" value="170" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consBrushCheck" checked onchange="calculateAll()">
+                <label for="consBrushCheck">Кисть макловица 50×150 мм</label>
+                <div class="price-inline">
+                    <input type="number" id="priceBrush" value="270" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Плёнка полиэтилен. 80 мкр 1,5×100 м (кол-во)</label>
-                <input type="number" id="qtyFilm" value="1" onchange="calculateAll()">
-                <span class="unit">шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consGunCheck" checked onchange="calculateAll()">
+                <label for="consGunCheck">Пистолет для пены</label>
+                <div class="price-inline">
+                    <input type="number" id="priceGun" value="374" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Плёнка полиэтилен. 80 мкр (цена)</label>
-                <input type="number" id="priceFilm" value="1820" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consCleanerCheck" checked onchange="calculateAll()">
+                <label for="consCleanerCheck">Очиститель пены 500 мл</label>
+                <div class="price-inline">
+                    <input type="number" id="priceCleaner" value="170" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Мешки для мусора 95×55 см (кол-во)</label>
-                <input type="number" id="qtyTrashBag" value="20" onchange="calculateAll()">
-                <span class="unit">шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consFilmCheck" checked onchange="calculateAll()">
+                <label for="consFilmCheck">Плёнка полиэтилен. 80 мкр</label>
+                <div class="price-inline">
+                    <input type="number" id="priceFilm" value="1820" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Мешки для мусора (цена)</label>
-                <input type="number" id="priceTrashBag" value="10" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consTrashCheck" checked onchange="calculateAll()">
+                <label for="consTrashCheck">Мешки для мусора (20 шт)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceTrashBag" value="10" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
-            <div class="price-input">
-                <label>Лента малярная 50 мм×40 м (кол-во)</label>
-                <input type="number" id="qtyTape" value="3" onchange="calculateAll()">
-                <span class="unit">шт</span>
-            </div>
-            <div class="price-input">
-                <label>Лента малярная (цена)</label>
-                <input type="number" id="priceTape" value="113" onchange="calculateAll()">
-                <span class="unit">₽/шт</span>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="consTapeCheck" checked onchange="calculateAll()">
+                <label for="consTapeCheck">Лента малярная 50 мм×40 м (3 шт)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceTape" value="113" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
             </div>
         </div>
 
@@ -599,10 +635,6 @@
                 <span class="result-label">Расходники</span>
                 <span class="result-value" id="resConsumables">0 ₽</span>
             </div>
-            <div class="result-row">
-                <span class="result-label">Доставка</span>
-                <span class="result-value" id="resDelivery">0 ₽</span>
-            </div>
             <div class="result-row total">
                 <span class="result-label">ИТОГО</span>
                 <span class="result-value" id="resTotal">0 ₽</span>
@@ -627,10 +659,13 @@
             </table>
         </div>
 
+        <button class="btn btn-share" onclick="shareEstimate()">📤 Отправить смету заказчику</button>
+        <div class="share-text" id="shareText"></div>
+
         <button class="btn btn-secondary" onclick="resetAll()">🗑 Сбросить всё</button>
 
         <div style="text-align:center; margin-top:15px; font-size:11px; color:#888;">
-            Церезит · Казань · Счёт №1431 · Олег К. Осиново
+            Церезит · Казань · zagmarTank
         </div>
     </div>
 
@@ -654,10 +689,23 @@
             document.querySelector(`[data-system="${sys}"]`).classList.add('active');
 
             const colorSection = document.getElementById('st174ColorSection');
+            const finishLabel = document.getElementById('matFinishLabel');
+
             if (sys === 'st174') {
                 colorSection.style.display = 'block';
+                finishLabel.textContent = 'СТ174 силикатно-силиконовая 25 кг';
+                document.getElementById('priceSt77').value = colorPrices[currentColor];
+            } else if (sys === 'st77') {
+                colorSection.style.display = 'none';
+                finishLabel.textContent = 'СТ77 мозаичная 25 кг';
+                document.getElementById('priceSt77').value = 11500;
+            } else if (sys === 'st710') {
+                colorSection.style.display = 'none';
+                finishLabel.textContent = 'Керамогранит (цена отдельно)';
+                document.getElementById('priceSt77').value = 0;
             } else {
                 colorSection.style.display = 'none';
+                finishLabel.textContent = 'Своя система';
             }
 
             calculateAll();
@@ -673,6 +721,7 @@
                 customInput.style.display = 'flex';
             } else {
                 customInput.style.display = 'none';
+                document.getElementById('priceSt77').value = colorPrices[color];
             }
 
             calculateAll();
@@ -745,6 +794,10 @@
             return parseFloat(document.getElementById(id).value) || 0;
         }
 
+        function isChecked(id) {
+            return document.getElementById(id).checked;
+        }
+
         function calculateAll() {
             let totalPm = 0;
             let totalArea = 0;
@@ -758,166 +811,182 @@
 
             // === ЦЕНЫ МАТЕРИАЛОВ ===
             const priceEppPack = getNum('priceEppPack');
-            const priceSt84 = getNum('priceSt84');
             const priceSt85 = getNum('priceSt85');
-            const priceSt16 = getNum('priceSt16');
-            const priceSt17 = getNum('priceSt17');
             const priceMesh = getNum('priceMesh');
             const priceCornerProf = getNum('priceCornerProf');
             const priceDempfer = getNum('priceDempfer');
+            const priceSt17 = getNum('priceSt17');
+            const priceSt16 = getNum('priceSt16');
             const priceSt77 = getNum('priceSt77');
-            const priceDubel = getNum('priceDubel');
 
-            let priceSt174;
-            if (currentColor === 'custom') {
-                priceSt174 = getNum('priceSt174Custom');
-            } else {
-                priceSt174 = colorPrices[currentColor];
-            }
-
-            // === РАСЧЁТ МАТЕРИАЛОВ ===
+            // === РАСЧЁТ МАТЕРИАЛОВ (только отмеченные) ===
+            let totalMaterials = 0;
+            let matHtml = '';
 
             // ЭППС
-            let maxHeight = 0;
-            surfaces.forEach(s => { if (s.height > maxHeight) maxHeight = s.height; });
-
-            const sheetsPerPack = 8;
-
-            let totalSheetsNeeded = 0;
-            surfaces.forEach(s => {
-                if (s.height <= 0.58) {
-                    const sheets = Math.ceil(s.length / 1.18);
-                    totalSheetsNeeded += sheets;
-                } else {
-                    const sheets = Math.ceil(s.length / 0.58);
-                    totalSheetsNeeded += sheets;
-                }
-            });
-
-            const eppPacks = Math.ceil(totalSheetsNeeded / sheetsPerPack);
-            const eppCost = eppPacks * priceEppPack;
-
-            // СТ84 или дюбели
-            const useSt84 = document.getElementById('useSt84').checked;
-            let dubelCount = 0;
-            let dubelCost = 0;
-            let st84Count = 0;
-            let st84Cost = 0;
-
-            if (useSt84) {
-                st84Count = Math.ceil(totalSheetsNeeded / 12);
-                st84Cost = st84Count * priceSt84;
-            } else {
-                dubelCount = totalSheetsNeeded * 5;
-                dubelCost = dubelCount * priceDubel;
+            if (isChecked('matEppCheck')) {
+                let totalSheetsNeeded = 0;
+                surfaces.forEach(s => {
+                    if (s.height <= 0.58) {
+                        totalSheetsNeeded += Math.ceil(s.length / 1.18);
+                    } else {
+                        totalSheetsNeeded += Math.ceil(s.length / 0.58);
+                    }
+                });
+                const eppPacks = Math.ceil(totalSheetsNeeded / 8);
+                const eppCost = eppPacks * priceEppPack;
+                totalMaterials += eppCost;
+                matHtml += `<tr><td>ЭППС ГРАФИТ XPS (упак. 8 листов)</td><td>${eppPacks} упак</td><td>${eppCost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
             // СТ85
-            const st85Bags = Math.max(5, Math.ceil((totalPm / 42) * 7) + 2);
-            const st85Cost = st85Bags * priceSt85;
-
-            // Сетка
-            const meshRolls = Math.ceil(totalArea / 50);
-            const meshCost = meshRolls * priceMesh;
-
-            // Профили
-            const cornerProfCount = Math.ceil(totalCorners * 2 / 2.5);
-            const cornerProfCost = cornerProfCount * priceCornerProf;
-
-            // Демпферная лента
-            const dempferCount = Math.ceil(totalPm / 10);
-            const dempferCost = dempferCount * priceDempfer;
-
-            // Грунтовки
-            const st17Count = Math.ceil(totalArea / 14);
-            const st17Cost = st17Count * priceSt17;
-
-            const st16Count = Math.ceil(totalArea / 120);
-            const st16Cost = st16Count * priceSt16;
-
-            // Финишный слой — запас +1 ведро минимум
-            let finishCount = 0;
-            let finishCost = 0;
-            let finishName = '';
-
-            if (currentSystem === 'st77') {
-                // 1 ведро 25кг = 3,5 м² · запас +1 ведро
-                finishCount = Math.ceil(totalArea / 3.5) + 1;
-                finishCost = finishCount * priceSt77;
-                finishName = 'СТ77 мозаичная 25 кг (+1 ведро запас)';
-            } else if (currentSystem === 'st174') {
-                // 1 ведро 25кг = 7,5 м² · запас +1 ведро
-                finishCount = Math.ceil(totalArea / 7.5) + 1;
-                finishCost = finishCount * priceSt174;
-                finishName = 'СТ174 силикатно-силиконовая 25 кг (+1 ведро запас)';
-            } else if (currentSystem === 'st710') {
-                finishName = 'Керамогранит (расчёт отдельно)';
-                finishCost = 0;
-            } else {
-                finishName = 'Своя система';
-                finishCost = 0;
+            if (isChecked('matSt85Check')) {
+                const st85Bags = Math.max(5, Math.ceil((totalPm / 42) * 7) + 2);
+                const st85Cost = st85Bags * priceSt85;
+                totalMaterials += st85Cost;
+                matHtml += `<tr><td>СТ85 штукатурно-клеевая 25 кг</td><td>${st85Bags} меш</td><td>${st85Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
-            const totalMaterials = eppCost + dubelCost + st84Cost + st85Cost + meshCost + cornerProfCost + dempferCost + st17Cost + st16Cost + finishCost;
+            // Сетка
+            if (isChecked('matMeshCheck')) {
+                const meshRolls = Math.ceil(totalArea / 50);
+                const meshCost = meshRolls * priceMesh;
+                totalMaterials += meshCost;
+                matHtml += `<tr><td>Сетка Крепикс 2000 (1×50 м)</td><td>${meshRolls} рул</td><td>${meshCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
 
-            // === РАБОТЫ ===
-            const pClean = getNum('priceClean');
-            const pLevel = getNum('priceLevel');
-            const pHydro = getNum('priceHydro');
-            const pEpp = getNum('priceEpp');
-            const pProfile = getNum('priceProfile');
-            const pArm = getNum('priceArm');
-            const pQuartz = getNum('priceQuartz');
-            const pFinish = getNum('priceFinish');
+            // Профили
+            if (isChecked('matCornerCheck')) {
+                const cornerProfCount = Math.ceil(totalCorners * 2 / 2.5);
+                const cornerProfCost = cornerProfCount * priceCornerProf;
+                totalMaterials += cornerProfCost;
+                matHtml += `<tr><td>Угловые профили ПВХ 2,5 м</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
 
-            const workClean = totalPm * pClean;
-            const workLevel = totalPm * pLevel;
-            const workHydro = totalPm * pHydro;
-            const workEpp = totalPm * pEpp;
-            const workProfile = totalPm * pProfile;
-            const workArm = totalPm * pArm;
-            const workQuartz = totalPm * pQuartz;
-            const workFinish = totalPm * pFinish;
+            // Демпферная лента
+            if (isChecked('matDempferCheck')) {
+                const dempferCount = Math.ceil(totalPm / 10);
+                const dempferCost = dempferCount * priceDempfer;
+                totalMaterials += dempferCost;
+                matHtml += `<tr><td>Демпферная лента 10 м</td><td>${dempferCount} шт</td><td>${dempferCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
 
-            const totalWork = workClean + workLevel + workHydro + workEpp + workProfile + workArm + workQuartz + workFinish;
+            // СТ17
+            if (isChecked('matSt17Check')) {
+                const st17Count = Math.ceil(totalArea / 14);
+                const st17Cost = st17Count * priceSt17;
+                totalMaterials += st17Cost;
+                matHtml += `<tr><td>СТ17 PRO грунтовка 10 л</td><td>${st17Count} шт</td><td>${st17Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
 
-            // === РАСХОДНИКИ ===
-            const qtyBucket = getNum('qtyBucket');
-            const priceBucket = getNum('priceBucket');
-            const qtySpatula = getNum('qtySpatula');
-            const priceSpatula = getNum('priceSpatula');
-            const qtyRoller = getNum('qtyRoller');
-            const priceRoller = getNum('priceRoller');
-            const qtyBrush = getNum('qtyBrush');
-            const priceBrush = getNum('priceBrush');
-            const qtyGun = getNum('qtyGun');
-            const priceGun = getNum('priceGun');
-            const qtyCleaner = getNum('qtyCleaner');
-            const priceCleaner = getNum('priceCleaner');
-            const qtyFilm = getNum('qtyFilm');
-            const priceFilm = getNum('priceFilm');
-            const qtyTrashBag = getNum('qtyTrashBag');
-            const priceTrashBag = getNum('priceTrashBag');
-            const qtyTape = getNum('qtyTape');
-            const priceTape = getNum('priceTape');
+            // СТ16
+            if (isChecked('matSt16Check')) {
+                const st16Count = Math.ceil(totalArea / 120);
+                const st16Cost = st16Count * priceSt16;
+                totalMaterials += st16Cost;
+                matHtml += `<tr><td>СТ16 грунтовка 10 л</td><td>${st16Count} шт</td><td>${st16Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
 
-            const totalConsumables = 
-                (qtyBucket * priceBucket) +
-                (qtySpatula * priceSpatula) +
-                (qtyRoller * priceRoller) +
-                (qtyBrush * priceBrush) +
-                (qtyGun * priceGun) +
-                (qtyCleaner * priceCleaner) +
-                (qtyFilm * priceFilm) +
-                (qtyTrashBag * priceTrashBag) +
-                (qtyTape * priceTape);
+            // Финиш
+            if (isChecked('matFinishCheck')) {
+                let finishCount = 0;
+                let finishCost = 0;
+                let finishName = '';
 
-            // === ДОСТАВКА ===
-            const needDelivery = document.getElementById('needDelivery').checked;
-            const deliveryCost = needDelivery ? 3800 : 0;
+                if (currentSystem === 'st77') {
+                    finishCount = Math.ceil(totalArea / 3.5) + 1;
+                    finishCost = finishCount * priceSt77;
+                    finishName = 'СТ77 мозаичная 25 кг (+1 ведро запас)';
+                } else if (currentSystem === 'st174') {
+                    finishCount = Math.ceil(totalArea / 7.5) + 1;
+                    finishCost = finishCount * priceSt77;
+                    finishName = 'СТ174 силикатно-силиконовая 25 кг (+1 ведро запас)';
+                }
+
+                if (finishName) {
+                    totalMaterials += finishCost;
+                    matHtml += `<tr><td>${finishName}</td><td>${finishCount} вед</td><td>${finishCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                }
+            }
+
+            // === РАБОТЫ (только отмеченные) ===
+            let totalWork = 0;
+            let workHtml = '';
+
+            if (isChecked('workCleanCheck')) {
+                const cost = totalPm * getNum('priceClean');
+                totalWork += cost;
+                workHtml += `<tr><td>Очистка + грунтовка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workLevelCheck')) {
+                const cost = totalPm * getNum('priceLevel');
+                totalWork += cost;
+                workHtml += `<tr><td>Выравнивание</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workHydroCheck')) {
+                const cost = totalPm * getNum('priceHydro');
+                totalWork += cost;
+                workHtml += `<tr><td>Гидрофобизация</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workEppCheck')) {
+                const cost = totalPm * getNum('priceEpp');
+                totalWork += cost;
+                workHtml += `<tr><td>Монтаж ЭППС</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workProfileCheck')) {
+                const cost = totalPm * getNum('priceProfile');
+                totalWork += cost;
+                workHtml += `<tr><td>Угловые профили</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workArmCheck')) {
+                const cost = totalPm * getNum('priceArm');
+                totalWork += cost;
+                workHtml += `<tr><td>Армирование</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workQuartzCheck')) {
+                const cost = totalPm * getNum('priceQuartz');
+                totalWork += cost;
+                workHtml += `<tr><td>Кварцевая грунтовка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+            if (isChecked('workFinishCheck')) {
+                const cost = totalPm * getNum('priceFinish');
+                totalWork += cost;
+                workHtml += `<tr><td>Мозаика / штукатурка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+
+            // === РАСХОДНИКИ (только отмеченные) ===
+            let totalConsumables = 0;
+
+            if (isChecked('consBucketCheck')) {
+                totalConsumables += 2 * getNum('priceBucket');
+            }
+            if (isChecked('consSpatulaCheck')) {
+                totalConsumables += 2 * getNum('priceSpatula');
+            }
+            if (isChecked('consRollerCheck')) {
+                totalConsumables += 1 * getNum('priceRoller');
+            }
+            if (isChecked('consBrushCheck')) {
+                totalConsumables += 1 * getNum('priceBrush');
+            }
+            if (isChecked('consGunCheck')) {
+                totalConsumables += 1 * getNum('priceGun');
+            }
+            if (isChecked('consCleanerCheck')) {
+                totalConsumables += 1 * getNum('priceCleaner');
+            }
+            if (isChecked('consFilmCheck')) {
+                totalConsumables += 1 * getNum('priceFilm');
+            }
+            if (isChecked('consTrashCheck')) {
+                totalConsumables += 20 * getNum('priceTrashBag');
+            }
+            if (isChecked('consTapeCheck')) {
+                totalConsumables += 3 * getNum('priceTape');
+            }
 
             // === ИТОГО ===
-            const grandTotal = totalWork + totalMaterials + totalConsumables + deliveryCost;
+            const grandTotal = totalWork + totalMaterials + totalConsumables;
 
             // === ВЫВОД ===
             document.getElementById('resSurfaces').textContent = surfaces.length + ' шт';
@@ -926,44 +995,104 @@
             document.getElementById('resWork').textContent = totalWork.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resMaterials').textContent = totalMaterials.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resConsumables').textContent = totalConsumables.toLocaleString('ru-RU') + ' ₽';
-            document.getElementById('resDelivery').textContent = deliveryCost.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resTotal').textContent = grandTotal.toLocaleString('ru-RU') + ' ₽';
 
-            // Таблица материалов
-            const matBody = document.getElementById('materialsBody');
-            let matHtml = `
-                <tr><td>ЭППС ГРАФИТ XPS (упак. 8 листов)</td><td>${eppPacks} упак</td><td>${eppCost.toLocaleString('ru-RU')} ₽</td></tr>
-            `;
-            if (useSt84) {
-                matHtml += `<tr><td>СТ84 полиуретановый клей 800 мл</td><td>${st84Count} шт</td><td>${st84Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
-            } else {
-                matHtml += `<tr><td>Дюбель-гвозди 6×60</td><td>${dubelCount} шт</td><td>${dubelCost.toLocaleString('ru-RU')} ₽</td></tr>`;
-            }
-            matHtml += `
-                <tr><td>СТ85 штукатурно-клеевая 25 кг</td><td>${st85Bags} меш</td><td>${st85Cost.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Сетка Крепикс 2000 (1×50 м)</td><td>${meshRolls} рул</td><td>${meshCost.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Угловые профили ПВХ 2,5 м</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Демпферная лента 10 м</td><td>${dempferCount} шт</td><td>${dempferCost.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>СТ17 PRO грунтовка 10 л</td><td>${st17Count} шт</td><td>${st17Cost.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>СТ16 грунтовка 10 л</td><td>${st16Count} шт</td><td>${st16Cost.toLocaleString('ru-RU')} ₽</td></tr>
-            `;
-            if (finishName) {
-                matHtml += `<tr><td>${finishName}</td><td>${finishCount} вед</td><td>${finishCost.toLocaleString('ru-RU')} ₽</td></tr>`;
-            }
-            matBody.innerHTML = matHtml;
+            document.getElementById('materialsBody').innerHTML = matHtml;
+            document.getElementById('worksBody').innerHTML = workHtml;
+        }
 
-            // Таблица работ
-            const workBody = document.getElementById('worksBody');
-            workBody.innerHTML = `
-                <tr><td>Очистка + грунтовка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workClean.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Выравнивание</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workLevel.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Гидрофобизация</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workHydro.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Монтаж ЭППС</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workEpp.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Угловые профили</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workProfile.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Армирование</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workArm.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Кварцевая грунтовка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workQuartz.toLocaleString('ru-RU')} ₽</td></tr>
-                <tr><td>Мозаика / штукатурка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${workFinish.toLocaleString('ru-RU')} ₽</td></tr>
-            `;
+        function shareEstimate() {
+            let totalPm = 0;
+            let totalArea = 0;
+            surfaces.forEach(s => {
+                totalPm += s.pm;
+                totalArea += s.area;
+            });
+
+            const client = document.getElementById('clientName').value || '—';
+            const address = document.getElementById('clientAddress').value || '—';
+            const date = document.getElementById('estimateDate').value || new Date().toLocaleDateString('ru-RU');
+
+            let text = `📐 СМЕТА ЦОКОЛЬ / ФАСАД
+`;
+            text += `Клиент: ${client}
+`;
+            text += `Адрес: ${address}
+`;
+            text += `Дата: ${date}
+`;
+            text += `
+📏 ПАРАМЕТРЫ ОБЪЕКТА
+`;
+            text += `Плоскостей: ${surfaces.length} шт
+`;
+            text += `Периметр: ${totalPm.toFixed(2)} п.м.
+`;
+            text += `Площадь: ${totalArea.toFixed(2)} м²
+`;
+
+            // Работы
+            text += `
+🔧 РАБОТЫ
+`;
+            let totalWork = 0;
+            const workItems = [
+                {check: 'workCleanCheck', name: 'Очистка + грунтовка', priceId: 'priceClean'},
+                {check: 'workLevelCheck', name: 'Выравнивание', priceId: 'priceLevel'},
+                {check: 'workHydroCheck', name: 'Гидрофобизация', priceId: 'priceHydro'},
+                {check: 'workEppCheck', name: 'Монтаж ЭППС', priceId: 'priceEpp'},
+                {check: 'workProfileCheck', name: 'Угловые профили', priceId: 'priceProfile'},
+                {check: 'workArmCheck', name: 'Армирование', priceId: 'priceArm'},
+                {check: 'workQuartzCheck', name: 'Кварцевая грунтовка', priceId: 'priceQuartz'},
+                {check: 'workFinishCheck', name: 'Мозаика / штукатурка', priceId: 'priceFinish'}
+            ];
+
+            workItems.forEach(item => {
+                if (isChecked(item.check)) {
+                    const price = getNum(item.priceId);
+                    const cost = totalPm * price;
+                    totalWork += cost;
+                    text += `• ${item.name}: ${totalPm.toFixed(2)} п.м. × ${price} ₽ = ${cost.toLocaleString('ru-RU')} ₽
+`;
+                }
+            });
+            text += `Итого работа: ${totalWork.toLocaleString('ru-RU')} ₽
+`;
+
+            // Материалы
+            text += `
+📦 МАТЕРИАЛЫ
+`;
+            let totalMat = 0;
+            // ... (упрощённо, можно расширить)
+            text += `Итого материалы: ${parseInt(document.getElementById('resMaterials').textContent.replace(/[^0-9]/g, ''))} ₽
+`;
+
+            // Расходники
+            const totalCons = parseInt(document.getElementById('resConsumables').textContent.replace(/[^0-9]/g, ''));
+            if (totalCons > 0) {
+                text += `
+🛠 РАСХОДНИКИ: ${totalCons.toLocaleString('ru-RU')} ₽
+`;
+            }
+
+            // Итого
+            const grandTotal = parseInt(document.getElementById('resTotal').textContent.replace(/[^0-9]/g, ''));
+            text += `
+💰 ИТОГО: ${grandTotal.toLocaleString('ru-RU')} ₽
+`;
+
+            const shareDiv = document.getElementById('shareText');
+            shareDiv.textContent = text;
+            shareDiv.style.display = 'block';
+
+            // Копируем в буфер
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Смета скопирована! Вставь в WhatsApp / Telegram');
+            }).catch(() => {
+                // Fallback
+                shareDiv.select?.();
+            });
         }
 
         function resetAll() {
@@ -974,8 +1103,11 @@
             document.getElementById('clientName').value = '';
             document.getElementById('clientAddress').value = '';
             document.getElementById('estimateDate').value = '';
-            document.getElementById('needDelivery').checked = false;
-            document.getElementById('useSt84').checked = true;
+            document.getElementById('shareText').style.display = 'none';
+
+            // Сброс галочек
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+
             updateCount();
             calculateAll();
         }
