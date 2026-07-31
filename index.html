@@ -443,6 +443,15 @@
                     <span>₽/п.м.</span>
                 </div>
             </div>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="workOtkosCheck" onchange="calculateAll()">
+                <label for="workOtkosCheck">Формирование откосов</label>
+                <div class="price-inline">
+                    <input type="number" id="priceOtkos" value="2000" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
+            </div>
         </div>
 
         <!-- МАТЕРИАЛЫ — ВСЕ С ГАЛОЧКАМИ -->
@@ -953,6 +962,11 @@
                 totalWork += cost;
                 workHtml += `<tr><td>Мозаика / штукатурка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
+            if (isChecked('workOtkosCheck')) {
+                const cost = totalPm * getNum('priceOtkos');
+                totalWork += cost;
+                workHtml += `<tr><td>Формирование откосов</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
 
             // === РАСХОДНИКИ (только отмеченные) ===
             let totalConsumables = 0;
@@ -1044,7 +1058,8 @@
                 {check: 'workProfileCheck', name: 'Угловые профили', priceId: 'priceProfile'},
                 {check: 'workArmCheck', name: 'Армирование', priceId: 'priceArm'},
                 {check: 'workQuartzCheck', name: 'Кварцевая грунтовка', priceId: 'priceQuartz'},
-                {check: 'workFinishCheck', name: 'Мозаика / штукатурка', priceId: 'priceFinish'}
+                {check: 'workFinishCheck', name: 'Мозаика / штукатурка', priceId: 'priceFinish'},
+            {check: 'workOtkosCheck', name: 'Формирование откосов', priceId: 'priceOtkos'}
             ];
 
             workItems.forEach(item => {
