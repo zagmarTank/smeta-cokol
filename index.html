@@ -520,6 +520,15 @@
                 </div>
             </div>
 
+            <div class="toggle-row" style="padding-left:30px; background:#f5f5f5;">
+                <input type="checkbox" id="matCornerHorizCheck" onchange="calculateAll()">
+                <label for="matCornerHorizCheck">+ Горизонтальные профили (по периметру)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceCornerProfHoriz" value="90" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
+            </div>
+
             <div class="toggle-row">
                 <input type="checkbox" id="matDempferCheck" checked onchange="calculateAll()">
                 <label for="matDempferCheck">Демпферная лента 10 м</label>
@@ -964,7 +973,16 @@
                 const cornerProfCount = Math.ceil(totalCorners * 2 / 2.5);
                 const cornerProfCost = cornerProfCount * priceCornerProf;
                 totalMaterials += cornerProfCost;
-                matHtml += `<tr><td>Угловые профили ПВХ 2,5 м</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matHtml += `<tr><td>Угловые профили ПВХ 2,5 м (вертикальные)</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+
+            // Горизонтальные профили
+            if (isChecked('matCornerHorizCheck')) {
+                const priceCornerProfHoriz = getNum('priceCornerProfHoriz');
+                const horizCount = Math.ceil(totalPm / 2.5);
+                const horizCost = horizCount * priceCornerProfHoriz;
+                totalMaterials += horizCost;
+                matHtml += `<tr><td>Угловые профили ПВХ 2,5 м (горизонтальные)</td><td>${horizCount} шт</td><td>${horizCost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
             // Демпферная лента
@@ -1253,6 +1271,7 @@
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
             document.getElementById('workOtkosCheck').checked = false;
             document.getElementById('matSt84Check').checked = false;
+            document.getElementById('matCornerHorizCheck').checked = false;
 
             updateCount();
             calculateAll();
