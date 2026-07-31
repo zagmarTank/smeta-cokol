@@ -433,10 +433,19 @@
             </div>
 
             <div class="toggle-row">
-                <input type="checkbox" id="workProfileCheck" checked onchange="calculateAll()">
-                <label for="workProfileCheck">Угловые профили</label>
+                <input type="checkbox" id="workProfileVertCheck" checked onchange="calculateAll()">
+                <label for="workProfileVertCheck">Монтаж профилей (вертикальные)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceProfile" value="200" onchange="calculateAll()">
+                    <input type="number" id="priceProfileVert" value="200" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="workProfileHorizCheck" onchange="calculateAll()">
+                <label for="workProfileHorizCheck">Монтаж профилей (горизонтальные)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceProfileHoriz" value="200" onchange="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -508,24 +517,6 @@
                 <div class="price-inline">
                     <input type="number" id="priceMesh" value="2700" onchange="calculateAll()">
                     <span>₽/рул</span>
-                </div>
-            </div>
-
-            <div class="toggle-row">
-                <input type="checkbox" id="matCornerCheck" checked onchange="calculateAll()">
-                <label for="matCornerCheck">Угловые профили ПВХ 2,5 м</label>
-                <div class="price-inline">
-                    <input type="number" id="priceCornerProf" value="90" onchange="calculateAll()">
-                    <span>₽/шт</span>
-                </div>
-            </div>
-
-            <div class="toggle-row" style="padding-left:30px; background:#f5f5f5;">
-                <input type="checkbox" id="matCornerHorizCheck" onchange="calculateAll()">
-                <label for="matCornerHorizCheck">+ Горизонтальные профили (по периметру)</label>
-                <div class="price-inline">
-                    <input type="number" id="priceCornerProfHoriz" value="90" onchange="calculateAll()">
-                    <span>₽/шт</span>
                 </div>
             </div>
 
@@ -968,23 +959,6 @@
                 matHtml += `<tr><td>Сетка Крепикс 2000 (1×50 м)</td><td>${meshRolls} рул</td><td>${meshCost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
-            // Профили
-            if (isChecked('matCornerCheck')) {
-                const cornerProfCount = Math.ceil(totalCorners * 2 / 2.5);
-                const cornerProfCost = cornerProfCount * priceCornerProf;
-                totalMaterials += cornerProfCost;
-                matHtml += `<tr><td>Угловые профили ПВХ 2,5 м (вертикальные)</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>`;
-            }
-
-            // Горизонтальные профили
-            if (isChecked('matCornerHorizCheck')) {
-                const priceCornerProfHoriz = getNum('priceCornerProfHoriz');
-                const horizCount = Math.ceil(totalPm / 2.5);
-                const horizCost = horizCount * priceCornerProfHoriz;
-                totalMaterials += horizCost;
-                matHtml += `<tr><td>Угловые профили ПВХ 2,5 м (горизонтальные)</td><td>${horizCount} шт</td><td>${horizCost.toLocaleString('ru-RU')} ₽</td></tr>`;
-            }
-
             // Демпферная лента
             if (isChecked('matDempferCheck')) {
                 const dempferCount = Math.ceil(totalPm / 10);
@@ -1060,10 +1034,22 @@
                 totalWork += cost;
                 workHtml += `<tr><td>Монтаж ЭППС</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
-            if (isChecked('workProfileCheck')) {
-                const cost = totalPm * getNum('priceProfile');
+            // Вертикальные профили — считаем от углов × высота
+            if (isChecked('workProfileVertCheck')) {
+                let totalVertPm = 0;
+                surfaces.forEach(s => {
+                    totalVertPm += s.corners * s.height;
+                });
+                const cost = totalVertPm * getNum('priceProfileVert');
                 totalWork += cost;
-                workHtml += `<tr><td>Угловые профили</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workHtml += `<tr><td>Монтаж профилей (вертикальные)</td><td>${totalVertPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+
+            // Горизонтальные профили — считаем по периметру
+            if (isChecked('workProfileHorizCheck')) {
+                const cost = totalPm * getNum('priceProfileHoriz');
+                totalWork += cost;
+                workHtml += `<tr><td>Монтаж профилей (горизонтальные)</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
             if (isChecked('workArmCheck')) {
                 const cost = totalPm * getNum('priceArm');
@@ -1179,7 +1165,8 @@
                 {check: 'workLevelCheck', name: 'Выравнивание', priceId: 'priceLevel'},
                 {check: 'workHydroCheck', name: 'Гидрофобизация', priceId: 'priceHydro'},
                 {check: 'workEppCheck', name: 'Монтаж ЭППС', priceId: 'priceEpp'},
-                {check: 'workProfileCheck', name: 'Угловые профили', priceId: 'priceProfile'},
+                {check: 'workProfileVertCheck', name: 'Монтаж профилей (вертикальные)', priceId: 'priceProfileVert'},
+            {check: 'workProfileHorizCheck', name: 'Монтаж профилей (горизонтальные)', priceId: 'priceProfileHoriz'},
                 {check: 'workArmCheck', name: 'Армирование', priceId: 'priceArm'},
                 {check: 'workQuartzCheck', name: 'Кварцевая грунтовка', priceId: 'priceQuartz'},
                 {check: 'workFinishCheck', name: 'Мозаика / штукатурка', priceId: 'priceFinish'},
@@ -1271,7 +1258,7 @@
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
             document.getElementById('workOtkosCheck').checked = false;
             document.getElementById('matSt84Check').checked = false;
-            document.getElementById('matCornerHorizCheck').checked = false;
+            document.getElementById('workProfileHorizCheck').checked = false;
 
             updateCount();
             calculateAll();
