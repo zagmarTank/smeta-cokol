@@ -1103,14 +1103,14 @@
             const grandTotal = totalWork + totalMaterials + totalConsumables;
 
             // === ВЫВОД ===
-            document.getElementById('resSurfaces').textContent = surfaces.length + ' шт';
-            document.getElementById('resPerimeter').textContent = totalPm.toFixed(2) + ' п.м.';
-            document.getElementById('resArea').textContent = totalArea.toFixed(2) + ' м²';
-
-            // Откосы в результаты
+            // Откосы — считаем заранее
             let totalOtkosPm = 0;
             let totalOtkosArea = 0;
             otkosList.forEach(o => { totalOtkosPm += o.pm; totalOtkosArea += o.area; });
+
+            document.getElementById('resSurfaces').textContent = surfaces.length + ' шт';
+            document.getElementById('resPerimeter').textContent = totalPm.toFixed(2) + ' п.м.';
+            document.getElementById('resArea').textContent = totalArea.toFixed(2) + ' м²';
             document.getElementById('resWork').textContent = totalWork.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resMaterials').textContent = totalMaterials.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resConsumables').textContent = totalConsumables.toLocaleString('ru-RU') + ' ₽';
@@ -1179,9 +1179,14 @@
             });
 
             // Откосы в отправке
-            let totalOtkosPm = 0;
-            otkosList.forEach(o => { totalOtkosPm += o.pm; });
-            if (isChecked('workOtkosCheck') && totalOtkosPm > 0) {
+            let shareOtkosPm = 0;
+            otkosList.forEach(o => { shareOtkosPm += o.pm; });
+            if (isChecked('workOtkosCheck') && shareOtkosPm > 0) {
+                const otkosPrice = getNum('priceOtkos');
+                const otkosCost = shareOtkosPm * otkosPrice;
+                totalWork += otkosCost;
+                text += `• Формирование откосов: ${shareOtkosPm.toFixed(2)} п.м. × ${otkosPrice} ₽ = ${otkosCost.toLocaleString('ru-RU')} ₽
+`;
                 const otkosPrice = getNum('priceOtkos');
                 const otkosCost = totalOtkosPm * otkosPrice;
                 totalWork += otkosCost;
