@@ -368,9 +368,33 @@
             <button class="btn btn-primary" onclick="addSurface()">+ Добавить плоскость</button>
         </div>
 
+        <!-- ОТКОСЫ — ОТДЕЛЬНЫЙ БЛОК -->
+        <div class="card">
+            <h2>Откосы <span class="summary-badge" id="otkosCount">0 шт</span></h2>
+            <div id="otkosList"></div>
+            <button class="btn btn-primary" onclick="addOtkos()" style="background:#333;">+ Добавить откос</button>
+            <div class="toggle-row" style="margin-top:10px;">
+                <input type="checkbox" id="workOtkosCheck" onchange="calculateAll()">
+                <label for="workOtkosCheck">Формирование откосов</label>
+                <div class="price-inline">
+                    <input type="number" id="priceOtkos" value="2000" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
+            </div>
+        </div>
+
         <!-- РАБОТЫ — ВСЕ С ГАЛОЧКАМИ -->
         <div class="card">
             <h2>Работы (₽/п.м.)</h2>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="workPrepCheck" checked onchange="calculateAll()">
+                <label for="workPrepCheck">Подготовка поверхности</label>
+                <div class="price-inline">
+                    <input type="number" id="pricePrep" value="100" onchange="calculateAll()">
+                    <span>₽/п.м.</span>
+                </div>
+            </div>
 
             <div class="toggle-row">
                 <input type="checkbox" id="workCleanCheck" checked onchange="calculateAll()">
@@ -444,14 +468,7 @@
                 </div>
             </div>
 
-            <div class="toggle-row">
-                <input type="checkbox" id="workOtkosCheck" onchange="calculateAll()">
-                <label for="workOtkosCheck">Формирование откосов</label>
-                <div class="price-inline">
-                    <input type="number" id="priceOtkos" value="2000" onchange="calculateAll()">
-                    <span>₽/п.м.</span>
-                </div>
-            </div>
+
         </div>
 
         <!-- МАТЕРИАЛЫ — ВСЕ С ГАЛОЧКАМИ -->
@@ -689,7 +706,9 @@
 
     <script>
         let surfaces = [];
+        let otkosList = [];
         let nextId = 1;
+        let otkosNextId = 1;
         let currentSystem = 'st77';
         let currentColor = 'white';
 
@@ -775,6 +794,63 @@
             document.getElementById('surfacesList').appendChild(div);
             surfaces.push({ id, length: 0, height: 0, corners: 0, area: 0, pm: 0 });
             updateCount();
+        }
+
+        function addOtkos() {
+            const id = otkosNextId++;
+            const div = document.createElement('div');
+            div.className = 'surface-item';
+            div.id = `otkos-${id}`;
+            div.innerHTML = `
+                <div class="surface-header">
+                    <span class="surface-title">Откос #${otkosList.length + 1}</span>
+                    <button class="btn btn-danger" onclick="removeOtkos(${id})">✕</button>
+                </div>
+                <div class="input-row">
+                    <label>Длина</label>
+                    <input type="number" id="otkos-len-${id}" placeholder="0" step="0.01" onchange="updateOtkos(${id})">
+                    <span class="unit">м</span>
+                </div>
+                <div class="input-row">
+                    <label>Высота</label>
+                    <input type="number" id="otkos-height-${id}" placeholder="0" step="0.01" onchange="updateOtkos(${id})">
+                    <span class="unit">м</span>
+                </div>
+                <div class="surface-result" id="otkos-result-${id}">Введите параметры</div>
+            `;
+            document.getElementById('otkosList').appendChild(div);
+            otkosList.push({ id, length: 0, height: 0, pm: 0, area: 0 });
+            updateOtkosCount();
+        }
+
+        function removeOtkos(id) {
+            const el = document.getElementById(`otkos-${id}`);
+            if (el) el.remove();
+            otkosList = otkosList.filter(o => o.id !== id);
+            const items = document.querySelectorAll('#otkosList .surface-item');
+            items.forEach((item, idx) => {
+                item.querySelector('.surface-title').textContent = `Откос #${idx + 1}`;
+            });
+            updateOtkosCount();
+            calculateAll();
+        }
+
+        function updateOtkos(id) {
+            const o = otkosList.find(o => o.id === id);
+            if (!o) return;
+            o.length = parseFloat(document.getElementById(`otkos-len-${id}`).value) || 0;
+            o.height = parseFloat(document.getElementById(`otkos-height-${id}`).value) || 0;
+            o.pm = o.length;
+            o.area = o.length * o.height;
+
+            document.getElementById(`otkos-result-${id}`).innerHTML = `
+                📏 ${o.pm.toFixed(2)} п.м. &nbsp;|&nbsp; 📐 ${o.area.toFixed(2)} м²
+            `;
+            calculateAll();
+        }
+
+        function updateOtkosCount() {
+            document.getElementById('otkosCount').textContent = otkosList.length + ' шт';
         }
 
         function removeSurface(id) {
@@ -941,6 +1017,11 @@
             let totalWork = 0;
             let workHtml = '';
 
+            if (isChecked('workPrepCheck')) {
+                const cost = totalPm * getNum('pricePrep');
+                totalWork += cost;
+                workHtml += `<tr><td>Подготовка поверхности</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
             if (isChecked('workCleanCheck')) {
                 const cost = totalPm * getNum('priceClean');
                 totalWork += cost;
@@ -1025,6 +1106,11 @@
             document.getElementById('resSurfaces').textContent = surfaces.length + ' шт';
             document.getElementById('resPerimeter').textContent = totalPm.toFixed(2) + ' п.м.';
             document.getElementById('resArea').textContent = totalArea.toFixed(2) + ' м²';
+
+            // Откосы в результаты
+            let totalOtkosPm = 0;
+            let totalOtkosArea = 0;
+            otkosList.forEach(o => { totalOtkosPm += o.pm; totalOtkosArea += o.area; });
             document.getElementById('resWork').textContent = totalWork.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resMaterials').textContent = totalMaterials.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resConsumables').textContent = totalConsumables.toLocaleString('ru-RU') + ' ₽';
@@ -1070,6 +1156,7 @@
 `;
             let totalWork = 0;
             const workItems = [
+                {check: 'workPrepCheck', name: 'Подготовка поверхности', priceId: 'pricePrep'},
                 {check: 'workCleanCheck', name: 'Очистка + грунтовка', priceId: 'priceClean'},
                 {check: 'workLevelCheck', name: 'Выравнивание', priceId: 'priceLevel'},
                 {check: 'workHydroCheck', name: 'Гидрофобизация', priceId: 'priceHydro'},
@@ -1090,6 +1177,18 @@
 `;
                 }
             });
+
+            // Откосы в отправке
+            let totalOtkosPm = 0;
+            otkosList.forEach(o => { totalOtkosPm += o.pm; });
+            if (isChecked('workOtkosCheck') && totalOtkosPm > 0) {
+                const otkosPrice = getNum('priceOtkos');
+                const otkosCost = totalOtkosPm * otkosPrice;
+                totalWork += otkosCost;
+                text += `• Формирование откосов: ${totalOtkosPm.toFixed(2)} п.м. × ${otkosPrice} ₽ = ${otkosCost.toLocaleString('ru-RU')} ₽
+`;
+            }
+
             text += `Итого работа: ${totalWork.toLocaleString('ru-RU')} ₽
 `;
 
@@ -1139,8 +1238,16 @@
             document.getElementById('estimateDate').value = '';
             document.getElementById('shareText').style.display = 'none';
 
+            // Сброс откосов
+            otkosList = [];
+            otkosNextId = 1;
+            document.getElementById('otkosList').innerHTML = '';
+            updateOtkosCount();
+
             // Сброс галочек
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            document.getElementById('workOtkosCheck').checked = false;
+            document.getElementById('matSt84Check').checked = false;
 
             updateCount();
             calculateAll();
