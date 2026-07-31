@@ -468,6 +468,15 @@
             </div>
 
             <div class="toggle-row">
+                <input type="checkbox" id="matSt84Check" onchange="calculateAll()">
+                <label for="matSt84Check">СТ84 клей-пена полиуретановый 800 мл</label>
+                <div class="price-inline">
+                    <input type="number" id="priceSt84" value="790" onchange="calculateAll()">
+                    <span>₽/балл</span>
+                </div>
+            </div>
+
+            <div class="toggle-row">
                 <input type="checkbox" id="matSt85Check" checked onchange="calculateAll()">
                 <label for="matSt85Check">СТ85 штукатурно-клеевая 25 кг</label>
                 <div class="price-inline">
@@ -833,19 +842,29 @@
             let matHtml = '';
 
             // ЭППС
+            let totalSheetsNeeded = 0;
+            surfaces.forEach(s => {
+                if (s.height <= 0.58) {
+                    totalSheetsNeeded += Math.ceil(s.length / 1.18);
+                } else {
+                    totalSheetsNeeded += Math.ceil(s.length / 0.58);
+                }
+            });
+
             if (isChecked('matEppCheck')) {
-                let totalSheetsNeeded = 0;
-                surfaces.forEach(s => {
-                    if (s.height <= 0.58) {
-                        totalSheetsNeeded += Math.ceil(s.length / 1.18);
-                    } else {
-                        totalSheetsNeeded += Math.ceil(s.length / 0.58);
-                    }
-                });
                 const eppPacks = Math.ceil(totalSheetsNeeded / 8);
                 const eppCost = eppPacks * priceEppPack;
                 totalMaterials += eppCost;
                 matHtml += `<tr><td>ЭППС ГРАФИТ XPS (упак. 8 листов)</td><td>${eppPacks} упак</td><td>${eppCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+
+            // СТ84 клей-пена
+            if (isChecked('matSt84Check')) {
+                const priceSt84 = getNum('priceSt84');
+                const st84Count = Math.ceil(totalSheetsNeeded / 12);
+                const st84Cost = st84Count * priceSt84;
+                totalMaterials += st84Cost;
+                matHtml += `<tr><td>СТ84 клей-пена 800 мл</td><td>${st84Count} балл</td><td>${st84Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
             // СТ85
