@@ -521,6 +521,24 @@
             </div>
 
             <div class="toggle-row">
+                <input type="checkbox" id="matCornerCheck" checked onchange="calculateAll()">
+                <label for="matCornerCheck">Угловые профили ПВХ со стеклосеткой 2,5 м</label>
+                <div class="price-inline">
+                    <input type="number" id="priceCornerProf" value="90" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
+            </div>
+
+            <div class="toggle-row" style="padding-left:30px; background:#f5f5f5;">
+                <input type="checkbox" id="matCornerHorizCheck" onchange="calculateAll()">
+                <label for="matCornerHorizCheck">+ Горизонтальные профили (по периметру)</label>
+                <div class="price-inline">
+                    <input type="number" id="priceCornerProfHoriz" value="90" onchange="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
+            </div>
+
+            <div class="toggle-row">
                 <input type="checkbox" id="matDempferCheck" checked onchange="calculateAll()">
                 <label for="matDempferCheck">Демпферная лента 10 м</label>
                 <div class="price-inline">
@@ -907,6 +925,7 @@
             const priceEppPack = getNum('priceEppPack');
             const priceSt85 = getNum('priceSt85');
             const priceMesh = getNum('priceMesh');
+            const priceCornerProf = getNum('priceCornerProf');
             const priceDempfer = getNum('priceDempfer');
             const priceSt17 = getNum('priceSt17');
             const priceSt16 = getNum('priceSt16');
@@ -961,6 +980,25 @@
                 const meshCost = meshRolls * priceMesh;
                 totalMaterials += meshCost;
                 matHtml += `<tr><td>Сетка Крепикс 2000 (1×50 м)</td><td>${meshRolls} рул</td><td>${meshCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+
+            // Угловые профили (вертикальные — по углам × высота)
+            if (isChecked('matCornerCheck')) {
+                let totalCornerPm = 0;
+                surfaces.forEach(s => { totalCornerPm += s.corners * s.height; });
+                const cornerProfCount = Math.ceil(totalCornerPm / 2.5);
+                const cornerProfCost = cornerProfCount * priceCornerProf;
+                totalMaterials += cornerProfCost;
+                matHtml += `<tr><td>Угловые профили ПВХ со стеклосеткой 2,5 м</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+            }
+
+            // Угловые профили (горизонтальные — по периметру)
+            if (isChecked('matCornerHorizCheck')) {
+                const priceCornerProfHoriz = getNum('priceCornerProfHoriz');
+                const horizCount = Math.ceil(totalPm / 2.5);
+                const horizCost = horizCount * priceCornerProfHoriz;
+                totalMaterials += horizCost;
+                matHtml += `<tr><td>Угловые профили ПВХ со стеклосеткой 2,5 м (гориз.)</td><td>${horizCount} шт</td><td>${horizCost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
             // Демпферная лента
@@ -1257,6 +1295,7 @@
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
             document.getElementById('workOtkosCheck').checked = false;
             document.getElementById('matSt84Check').checked = false;
+            document.getElementById('matCornerHorizCheck').checked = false;
             document.getElementById('workProfileHorizCheck').checked = false;
 
             updateCount();
