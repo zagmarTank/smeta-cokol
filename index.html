@@ -1336,14 +1336,29 @@
             try {
                 const blob = await Packer.toBlob(doc);
                 const fileName = `Смета_${client.replace(/[^a-zA-Zа-яА-Я0-9]+/g, '_')}_${date.replace(/\./g, '-')}.docx`;
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+                if (isIOS) {
+                    // iOS Safari игнорирует a[download] с blob-ссылками — открываем файл напрямую,
+                    // Safari покажет предпросмотр с кнопкой "Поделиться" → "Сохранить в Файлы"
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        window.location.href = reader.result;
+                    };
+                    reader.readAsDataURL(blob);
+                    alert('Файл откроется в новой вкладке. Нажми кнопку "Поделиться" вверху и выбери "Сохранить в Файлы".');
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
             } catch (e) {
                 console.error(e);
                 alert('Ошибка при создании Word-файла: ' + e.message);
