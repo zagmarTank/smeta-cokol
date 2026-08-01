@@ -857,7 +857,7 @@
             const el = document.getElementById(`surface-${id}`);
             if (el) el.remove();
             surfaces = surfaces.filter(s => s.id !== id);
-            const items = document.querySelectorAll('.surface-item');
+            const items = document.querySelectorAll('#surfacesList .surface-item');
             items.forEach((item, idx) => {
                 item.querySelector('.surface-title').textContent = `Плоскость #${idx + 1}`;
             });
@@ -907,11 +907,15 @@
             const priceEppPack = getNum('priceEppPack');
             const priceSt85 = getNum('priceSt85');
             const priceMesh = getNum('priceMesh');
-            const priceCornerProf = getNum('priceCornerProf');
             const priceDempfer = getNum('priceDempfer');
             const priceSt17 = getNum('priceSt17');
             const priceSt16 = getNum('priceSt16');
             const priceSt77 = getNum('priceSt77');
+
+            // === ОТКОСЫ (считаем заранее — нужны для блока работ) ===
+            let totalOtkosPm = 0;
+            let totalOtkosArea = 0;
+            otkosList.forEach(o => { totalOtkosPm += o.pm; totalOtkosArea += o.area; });
 
             // === РАСЧЁТ МАТЕРИАЛОВ (только отмеченные) ===
             let totalMaterials = 0;
@@ -1067,9 +1071,9 @@
                 workHtml += `<tr><td>Мозаика / штукатурка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
             if (isChecked('workOtkosCheck')) {
-                const cost = totalPm * getNum('priceOtkos');
+                const cost = totalOtkosPm * getNum('priceOtkos');
                 totalWork += cost;
-                workHtml += `<tr><td>Формирование откосов</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workHtml += `<tr><td>Формирование откосов</td><td>${totalOtkosPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
             }
 
             // === РАСХОДНИКИ (только отмеченные) ===
@@ -1107,11 +1111,6 @@
             const grandTotal = totalWork + totalMaterials + totalConsumables;
 
             // === ВЫВОД ===
-            // Откосы — считаем заранее
-            let totalOtkosPm = 0;
-            let totalOtkosArea = 0;
-            otkosList.forEach(o => { totalOtkosPm += o.pm; totalOtkosArea += o.area; });
-
             document.getElementById('resSurfaces').textContent = surfaces.length + ' шт';
             document.getElementById('resPerimeter').textContent = totalPm.toFixed(2) + ' п.м.';
             document.getElementById('resArea').textContent = totalArea.toFixed(2) + ' м²';
@@ -1192,11 +1191,6 @@
                 totalWork += otkosCost;
                 text += `• Формирование откосов: ${shareOtkosPm.toFixed(2)} п.м. × ${otkosPrice} ₽ = ${otkosCost.toLocaleString('ru-RU')} ₽
 `;
-                const otkosPrice = getNum('priceOtkos');
-                const otkosCost = totalOtkosPm * otkosPrice;
-                totalWork += otkosCost;
-                text += `• Формирование откосов: ${totalOtkosPm.toFixed(2)} п.м. × ${otkosPrice} ₽ = ${otkosCost.toLocaleString('ru-RU')} ₽
-`;
             }
 
             text += `Итого работа: ${totalWork.toLocaleString('ru-RU')} ₽
@@ -1206,8 +1200,13 @@
             text += `
 📦 МАТЕРИАЛЫ
 `;
-            let totalMat = 0;
-            // ... (упрощённо, можно расширить)
+            document.querySelectorAll('#materialsBody tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 3) {
+                    text += `• ${cells[0].textContent}: ${cells[1].textContent} — ${cells[2].textContent}
+`;
+                }
+            });
             text += `Итого материалы: ${parseInt(document.getElementById('resMaterials').textContent.replace(/[^0-9]/g, ''))} ₽
 `;
 
