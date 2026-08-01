@@ -355,7 +355,7 @@
                 </div>
                 <div class="price-input" id="customColorPrice" style="display:none;">
                     <label>Своя цена СТ174 (ведро 25кг)</label>
-                    <input type="number" id="priceSt174Custom" value="2800" onchange="calculateAll()">
+                    <input type="number" id="priceSt174Custom" value="2800" oninput="calculateAll()">
                     <span class="unit">₽/вед</span>
                 </div>
             </div>
@@ -377,7 +377,7 @@
                 <input type="checkbox" id="workOtkosCheck" onchange="calculateAll()">
                 <label for="workOtkosCheck">Формирование откосов</label>
                 <div class="price-inline">
-                    <input type="number" id="priceOtkos" value="2000" onchange="calculateAll()">
+                    <input type="number" id="priceOtkos" value="2000" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -391,7 +391,7 @@
                 <input type="checkbox" id="workPrepCheck" checked onchange="calculateAll()">
                 <label for="workPrepCheck">Подготовка поверхности</label>
                 <div class="price-inline">
-                    <input type="number" id="pricePrep" value="100" onchange="calculateAll()">
+                    <input type="number" id="pricePrep" value="100" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -400,7 +400,7 @@
                 <input type="checkbox" id="workCleanCheck" checked onchange="calculateAll()">
                 <label for="workCleanCheck">Очистка + грунтовка</label>
                 <div class="price-inline">
-                    <input type="number" id="priceClean" value="100" onchange="calculateAll()">
+                    <input type="number" id="priceClean" value="100" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -409,7 +409,7 @@
                 <input type="checkbox" id="workLevelCheck" checked onchange="calculateAll()">
                 <label for="workLevelCheck">Выравнивание</label>
                 <div class="price-inline">
-                    <input type="number" id="priceLevel" value="200" onchange="calculateAll()">
+                    <input type="number" id="priceLevel" value="200" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -418,7 +418,7 @@
                 <input type="checkbox" id="workHydroCheck" checked onchange="calculateAll()">
                 <label for="workHydroCheck">Гидрофобизация</label>
                 <div class="price-inline">
-                    <input type="number" id="priceHydro" value="400" onchange="calculateAll()">
+                    <input type="number" id="priceHydro" value="400" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -427,7 +427,7 @@
                 <input type="checkbox" id="workEppCheck" checked onchange="calculateAll()">
                 <label for="workEppCheck">Монтаж ЭППС</label>
                 <div class="price-inline">
-                    <input type="number" id="priceEpp" value="800" onchange="calculateAll()">
+                    <input type="number" id="priceEpp" value="800" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -436,7 +436,7 @@
                 <input type="checkbox" id="workProfileVertCheck" checked onchange="calculateAll()">
                 <label for="workProfileVertCheck">Монтаж профилей (вертикальные)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceProfileVert" value="200" onchange="calculateAll()">
+                    <input type="number" id="priceProfileVert" value="200" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -445,7 +445,7 @@
                 <input type="checkbox" id="workProfileHorizCheck" onchange="calculateAll()">
                 <label for="workProfileHorizCheck">Монтаж профилей (горизонтальные)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceProfileHoriz" value="200" onchange="calculateAll()">
+                    <input type="number" id="priceProfileHoriz" value="200" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -454,7 +454,7 @@
                 <input type="checkbox" id="workArmCheck" checked onchange="calculateAll()">
                 <label for="workArmCheck">Армирование</label>
                 <div class="price-inline">
-                    <input type="number" id="priceArm" value="1000" onchange="calculateAll()">
+                    <input type="number" id="priceArm" value="1000" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -463,7 +463,7 @@
                 <input type="checkbox" id="workQuartzCheck" checked onchange="calculateAll()">
                 <label for="workQuartzCheck">Кварцевая грунтовка</label>
                 <div class="price-inline">
-                    <input type="number" id="priceQuartz" value="100" onchange="calculateAll()">
+                    <input type="number" id="priceQuartz" value="100" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -472,7 +472,7 @@
                 <input type="checkbox" id="workFinishCheck" checked onchange="calculateAll()">
                 <label for="workFinishCheck">Мозаика / штукатурка</label>
                 <div class="price-inline">
-                    <input type="number" id="priceFinish" value="1500" onchange="calculateAll()">
+                    <input type="number" id="priceFinish" value="1500" oninput="calculateAll()">
                     <span>₽/п.м.</span>
                 </div>
             </div>
@@ -488,7 +488,7 @@
                 <input type="checkbox" id="matEppCheck" checked onchange="calculateAll()">
                 <label for="matEppCheck">ЭППС ГРАФИТ XPS (упак. 8 листов)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceEppPack" value="1990" onchange="calculateAll()">
+                    <input type="number" id="priceEppPack" value="1990" oninput="calculateAll()">
                     <span>₽/упак</span>
                 </div>
             </div>
@@ -497,7 +497,7 @@
                 <input type="checkbox" id="matSt84Check" onchange="calculateAll()">
                 <label for="matSt84Check">СТ84 клей-пена полиуретановый 800 мл</label>
                 <div class="price-inline">
-                    <input type="number" id="priceSt84" value="790" onchange="calculateAll()">
+                    <input type="number" id="priceSt84" value="790" oninput="calculateAll()">
                     <span>₽/балл</span>
                 </div>
             </div>
@@ -506,7 +506,7 @@
                 <input type="checkbox" id="matSt85Check" checked onchange="calculateAll()">
                 <label for="matSt85Check">СТ85 штукатурно-клеевая 25 кг</label>
                 <div class="price-inline">
-                    <input type="number" id="priceSt85" value="850" onchange="calculateAll()">
+                    <input type="number" id="priceSt85" value="850" oninput="calculateAll()">
                     <span>₽/меш</span>
                 </div>
             </div>
@@ -515,7 +515,7 @@
                 <input type="checkbox" id="matMeshCheck" checked onchange="calculateAll()">
                 <label for="matMeshCheck">Сетка Крепикс 2000 (1×50 м)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceMesh" value="2700" onchange="calculateAll()">
+                    <input type="number" id="priceMesh" value="2700" oninput="calculateAll()">
                     <span>₽/рул</span>
                 </div>
             </div>
@@ -524,7 +524,7 @@
                 <input type="checkbox" id="matCornerCheck" checked onchange="calculateAll()">
                 <label for="matCornerCheck">Угловые профили ПВХ со стеклосеткой 2,5 м</label>
                 <div class="price-inline">
-                    <input type="number" id="priceCornerProf" value="90" onchange="calculateAll()">
+                    <input type="number" id="priceCornerProf" value="90" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -533,7 +533,7 @@
                 <input type="checkbox" id="matCornerHorizCheck" onchange="calculateAll()">
                 <label for="matCornerHorizCheck">+ Горизонтальные профили (по периметру)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceCornerProfHoriz" value="90" onchange="calculateAll()">
+                    <input type="number" id="priceCornerProfHoriz" value="90" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -542,7 +542,7 @@
                 <input type="checkbox" id="matDempferCheck" checked onchange="calculateAll()">
                 <label for="matDempferCheck">Демпферная лента 10 м</label>
                 <div class="price-inline">
-                    <input type="number" id="priceDempfer" value="360" onchange="calculateAll()">
+                    <input type="number" id="priceDempfer" value="360" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -551,7 +551,7 @@
                 <input type="checkbox" id="matSt17Check" checked onchange="calculateAll()">
                 <label for="matSt17Check">СТ17 PRO грунтовка 10 л</label>
                 <div class="price-inline">
-                    <input type="number" id="priceSt17" value="1010" onchange="calculateAll()">
+                    <input type="number" id="priceSt17" value="1010" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -560,7 +560,7 @@
                 <input type="checkbox" id="matSt16Check" checked onchange="calculateAll()">
                 <label for="matSt16Check">СТ16 грунтовка 10 л / 16 кг</label>
                 <div class="price-inline">
-                    <input type="number" id="priceSt16" value="1850" onchange="calculateAll()">
+                    <input type="number" id="priceSt16" value="1850" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -569,7 +569,7 @@
                 <input type="checkbox" id="matFinishCheck" checked onchange="calculateAll()">
                 <label for="matFinishCheck" id="matFinishLabel">СТ77 мозаичная 25 кг</label>
                 <div class="price-inline">
-                    <input type="number" id="priceSt77" value="11500" onchange="calculateAll()">
+                    <input type="number" id="priceSt77" value="11500" oninput="calculateAll()">
                     <span>₽/вед</span>
                 </div>
             </div>
@@ -583,7 +583,7 @@
                 <input type="checkbox" id="consBucketCheck" checked onchange="calculateAll()">
                 <label for="consBucketCheck">Ведро строит. 16 л (2 шт)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceBucket" value="147" onchange="calculateAll()">
+                    <input type="number" id="priceBucket" value="147" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -592,7 +592,7 @@
                 <input type="checkbox" id="consSpatulaCheck" checked onchange="calculateAll()">
                 <label for="consSpatulaCheck">Шпатель 100 мм (2 шт)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceSpatula" value="44" onchange="calculateAll()">
+                    <input type="number" id="priceSpatula" value="44" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -601,7 +601,7 @@
                 <input type="checkbox" id="consRollerCheck" checked onchange="calculateAll()">
                 <label for="consRollerCheck">Валик 240 мм полиакрил</label>
                 <div class="price-inline">
-                    <input type="number" id="priceRoller" value="218" onchange="calculateAll()">
+                    <input type="number" id="priceRoller" value="218" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -610,7 +610,7 @@
                 <input type="checkbox" id="consBrushCheck" checked onchange="calculateAll()">
                 <label for="consBrushCheck">Кисть макловица 50×150 мм</label>
                 <div class="price-inline">
-                    <input type="number" id="priceBrush" value="270" onchange="calculateAll()">
+                    <input type="number" id="priceBrush" value="270" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -619,7 +619,7 @@
                 <input type="checkbox" id="consGunCheck" checked onchange="calculateAll()">
                 <label for="consGunCheck">Пистолет для пены</label>
                 <div class="price-inline">
-                    <input type="number" id="priceGun" value="374" onchange="calculateAll()">
+                    <input type="number" id="priceGun" value="374" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -628,7 +628,7 @@
                 <input type="checkbox" id="consCleanerCheck" checked onchange="calculateAll()">
                 <label for="consCleanerCheck">Очиститель пены 500 мл</label>
                 <div class="price-inline">
-                    <input type="number" id="priceCleaner" value="170" onchange="calculateAll()">
+                    <input type="number" id="priceCleaner" value="170" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -637,7 +637,7 @@
                 <input type="checkbox" id="consFilmCheck" checked onchange="calculateAll()">
                 <label for="consFilmCheck">Плёнка полиэтилен. 80 мкр</label>
                 <div class="price-inline">
-                    <input type="number" id="priceFilm" value="1820" onchange="calculateAll()">
+                    <input type="number" id="priceFilm" value="1820" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -646,7 +646,7 @@
                 <input type="checkbox" id="consTrashCheck" checked onchange="calculateAll()">
                 <label for="consTrashCheck">Мешки для мусора (20 шт)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceTrashBag" value="10" onchange="calculateAll()">
+                    <input type="number" id="priceTrashBag" value="10" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -655,7 +655,7 @@
                 <input type="checkbox" id="consTapeCheck" checked onchange="calculateAll()">
                 <label for="consTapeCheck">Лента малярная 50 мм×40 м (3 шт)</label>
                 <div class="price-inline">
-                    <input type="number" id="priceTape" value="113" onchange="calculateAll()">
+                    <input type="number" id="priceTape" value="113" oninput="calculateAll()">
                     <span>₽/шт</span>
                 </div>
             </div>
@@ -1205,6 +1205,7 @@
         }
 
         function shareEstimate() {
+            calculateAll();
             if (!lastResult) return;
             const { client, address, date } = getClientInfo();
             const r = lastResult;
