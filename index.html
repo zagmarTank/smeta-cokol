@@ -712,7 +712,7 @@
             </table>
         </div>
 
-        <button class="btn btn-share" onclick="shareEstimate()">📤 Отправить смету заказчику</button>
+        <button class="btn btn-share" onclick="shareEstimate()">📤 Отправить смету заказчику (Word)</button>
         <div class="share-text" id="shareText"></div>
 
         <button class="btn btn-secondary" onclick="resetAll()">🗑 Сбросить всё</button>
@@ -722,6 +722,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.umd.cjs"></script>
     <script>
         let surfaces = [];
         let otkosList = [];
@@ -729,6 +730,7 @@
         let otkosNextId = 1;
         let currentSystem = 'st77';
         let currentColor = 'white';
+        let lastResult = null;
 
         const colorPrices = {
             white: 2800,
@@ -938,7 +940,7 @@
 
             // === РАСЧЁТ МАТЕРИАЛОВ (только отмеченные) ===
             let totalMaterials = 0;
-            let matHtml = '';
+            const matItems = [];
 
             // ЭППС
             let totalSheetsNeeded = 0;
@@ -954,7 +956,7 @@
                 const eppPacks = Math.ceil(totalSheetsNeeded / 8);
                 const eppCost = eppPacks * priceEppPack;
                 totalMaterials += eppCost;
-                matHtml += `<tr><td>ЭППС ГРАФИТ XPS (упак. 8 листов)</td><td>${eppPacks} упак</td><td>${eppCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'ЭППС ГРАФИТ XPS (упак. 8 листов)', qty: `${eppPacks} упак`, cost: eppCost });
             }
 
             // СТ84 клей-пена
@@ -963,7 +965,7 @@
                 const st84Count = Math.ceil(totalSheetsNeeded / 12);
                 const st84Cost = st84Count * priceSt84;
                 totalMaterials += st84Cost;
-                matHtml += `<tr><td>СТ84 клей-пена 800 мл</td><td>${st84Count} балл</td><td>${st84Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'СТ84 клей-пена 800 мл', qty: `${st84Count} балл`, cost: st84Cost });
             }
 
             // СТ85
@@ -971,7 +973,7 @@
                 const st85Bags = Math.max(5, Math.ceil((totalPm / 42) * 7) + 2);
                 const st85Cost = st85Bags * priceSt85;
                 totalMaterials += st85Cost;
-                matHtml += `<tr><td>СТ85 штукатурно-клеевая 25 кг</td><td>${st85Bags} меш</td><td>${st85Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'СТ85 штукатурно-клеевая 25 кг', qty: `${st85Bags} меш`, cost: st85Cost });
             }
 
             // Сетка
@@ -979,7 +981,7 @@
                 const meshRolls = Math.ceil(totalArea / 50);
                 const meshCost = meshRolls * priceMesh;
                 totalMaterials += meshCost;
-                matHtml += `<tr><td>Сетка Крепикс 2000 (1×50 м)</td><td>${meshRolls} рул</td><td>${meshCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'Сетка Крепикс 2000 (1×50 м)', qty: `${meshRolls} рул`, cost: meshCost });
             }
 
             // Угловые профили (вертикальные — по углам × высота)
@@ -989,7 +991,7 @@
                 const cornerProfCount = Math.ceil(totalCornerPm / 2.5);
                 const cornerProfCost = cornerProfCount * priceCornerProf;
                 totalMaterials += cornerProfCost;
-                matHtml += `<tr><td>Угловые профили ПВХ со стеклосеткой 2,5 м</td><td>${cornerProfCount} шт</td><td>${cornerProfCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'Угловые профили ПВХ со стеклосеткой 2,5 м', qty: `${cornerProfCount} шт`, cost: cornerProfCost });
             }
 
             // Угловые профили (горизонтальные — по периметру)
@@ -998,7 +1000,7 @@
                 const horizCount = Math.ceil(totalPm / 2.5);
                 const horizCost = horizCount * priceCornerProfHoriz;
                 totalMaterials += horizCost;
-                matHtml += `<tr><td>Угловые профили ПВХ со стеклосеткой 2,5 м (гориз.)</td><td>${horizCount} шт</td><td>${horizCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'Угловые профили ПВХ со стеклосеткой 2,5 м (гориз.)', qty: `${horizCount} шт`, cost: horizCost });
             }
 
             // Демпферная лента
@@ -1006,7 +1008,7 @@
                 const dempferCount = Math.ceil(totalPm / 10);
                 const dempferCost = dempferCount * priceDempfer;
                 totalMaterials += dempferCost;
-                matHtml += `<tr><td>Демпферная лента 10 м</td><td>${dempferCount} шт</td><td>${dempferCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'Демпферная лента 10 м', qty: `${dempferCount} шт`, cost: dempferCost });
             }
 
             // СТ17
@@ -1014,7 +1016,7 @@
                 const st17Count = Math.ceil(totalArea / 14);
                 const st17Cost = st17Count * priceSt17;
                 totalMaterials += st17Cost;
-                matHtml += `<tr><td>СТ17 PRO грунтовка 10 л</td><td>${st17Count} шт</td><td>${st17Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'СТ17 PRO грунтовка 10 л', qty: `${st17Count} шт`, cost: st17Cost });
             }
 
             // СТ16
@@ -1022,7 +1024,7 @@
                 const st16Count = Math.ceil(totalArea / 120);
                 const st16Cost = st16Count * priceSt16;
                 totalMaterials += st16Cost;
-                matHtml += `<tr><td>СТ16 грунтовка 10 л</td><td>${st16Count} шт</td><td>${st16Cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                matItems.push({ name: 'СТ16 грунтовка 10 л', qty: `${st16Count} шт`, cost: st16Cost });
             }
 
             // Финиш
@@ -1043,38 +1045,38 @@
 
                 if (finishName) {
                     totalMaterials += finishCost;
-                    matHtml += `<tr><td>${finishName}</td><td>${finishCount} вед</td><td>${finishCost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                    matItems.push({ name: finishName, qty: `${finishCount} вед`, cost: finishCost });
                 }
             }
 
             // === РАБОТЫ (только отмеченные) ===
             let totalWork = 0;
-            let workHtml = '';
+            const workItems = [];
 
             if (isChecked('workPrepCheck')) {
                 const cost = totalPm * getNum('pricePrep');
                 totalWork += cost;
-                workHtml += `<tr><td>Подготовка поверхности</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Подготовка поверхности', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workCleanCheck')) {
                 const cost = totalPm * getNum('priceClean');
                 totalWork += cost;
-                workHtml += `<tr><td>Очистка + грунтовка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Очистка + грунтовка', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workLevelCheck')) {
                 const cost = totalPm * getNum('priceLevel');
                 totalWork += cost;
-                workHtml += `<tr><td>Выравнивание</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Выравнивание', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workHydroCheck')) {
                 const cost = totalPm * getNum('priceHydro');
                 totalWork += cost;
-                workHtml += `<tr><td>Гидрофобизация</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Гидрофобизация', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workEppCheck')) {
                 const cost = totalPm * getNum('priceEpp');
                 totalWork += cost;
-                workHtml += `<tr><td>Монтаж ЭППС</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Монтаж ЭППС', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             // Вертикальные профили — считаем от углов × высота
             if (isChecked('workProfileVertCheck')) {
@@ -1084,71 +1086,98 @@
                 });
                 const cost = totalVertPm * getNum('priceProfileVert');
                 totalWork += cost;
-                workHtml += `<tr><td>Монтаж профилей (вертикальные)</td><td>${totalVertPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Монтаж профилей (вертикальные)', qty: `${totalVertPm.toFixed(2)} п.м.`, cost });
             }
 
             // Горизонтальные профили — считаем по периметру
             if (isChecked('workProfileHorizCheck')) {
                 const cost = totalPm * getNum('priceProfileHoriz');
                 totalWork += cost;
-                workHtml += `<tr><td>Монтаж профилей (горизонтальные)</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Монтаж профилей (горизонтальные)', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workArmCheck')) {
                 const cost = totalPm * getNum('priceArm');
                 totalWork += cost;
-                workHtml += `<tr><td>Армирование</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Армирование', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workQuartzCheck')) {
                 const cost = totalPm * getNum('priceQuartz');
                 totalWork += cost;
-                workHtml += `<tr><td>Кварцевая грунтовка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Кварцевая грунтовка', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workFinishCheck')) {
                 const cost = totalPm * getNum('priceFinish');
                 totalWork += cost;
-                workHtml += `<tr><td>Мозаика / штукатурка</td><td>${totalPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Мозаика / штукатурка', qty: `${totalPm.toFixed(2)} п.м.`, cost });
             }
             if (isChecked('workOtkosCheck')) {
                 const cost = totalOtkosPm * getNum('priceOtkos');
                 totalWork += cost;
-                workHtml += `<tr><td>Формирование откосов</td><td>${totalOtkosPm.toFixed(2)} п.м.</td><td>${cost.toLocaleString('ru-RU')} ₽</td></tr>`;
+                workItems.push({ name: 'Формирование откосов', qty: `${totalOtkosPm.toFixed(2)} п.м.`, cost });
             }
 
             // === РАСХОДНИКИ (только отмеченные) ===
             let totalConsumables = 0;
+            const consItems = [];
 
             if (isChecked('consBucketCheck')) {
-                totalConsumables += 2 * getNum('priceBucket');
+                const cost = 2 * getNum('priceBucket');
+                totalConsumables += cost;
+                consItems.push({ name: 'Ведро строит. 16 л', qty: '2 шт', cost });
             }
             if (isChecked('consSpatulaCheck')) {
-                totalConsumables += 2 * getNum('priceSpatula');
+                const cost = 2 * getNum('priceSpatula');
+                totalConsumables += cost;
+                consItems.push({ name: 'Шпатель 100 мм', qty: '2 шт', cost });
             }
             if (isChecked('consRollerCheck')) {
-                totalConsumables += 1 * getNum('priceRoller');
+                const cost = 1 * getNum('priceRoller');
+                totalConsumables += cost;
+                consItems.push({ name: 'Валик 240 мм полиакрил', qty: '1 шт', cost });
             }
             if (isChecked('consBrushCheck')) {
-                totalConsumables += 1 * getNum('priceBrush');
+                const cost = 1 * getNum('priceBrush');
+                totalConsumables += cost;
+                consItems.push({ name: 'Кисть макловица 50×150 мм', qty: '1 шт', cost });
             }
             if (isChecked('consGunCheck')) {
-                totalConsumables += 1 * getNum('priceGun');
+                const cost = 1 * getNum('priceGun');
+                totalConsumables += cost;
+                consItems.push({ name: 'Пистолет для пены', qty: '1 шт', cost });
             }
             if (isChecked('consCleanerCheck')) {
-                totalConsumables += 1 * getNum('priceCleaner');
+                const cost = 1 * getNum('priceCleaner');
+                totalConsumables += cost;
+                consItems.push({ name: 'Очиститель пены 500 мл', qty: '1 шт', cost });
             }
             if (isChecked('consFilmCheck')) {
-                totalConsumables += 1 * getNum('priceFilm');
+                const cost = 1 * getNum('priceFilm');
+                totalConsumables += cost;
+                consItems.push({ name: 'Плёнка полиэтилен. 80 мкр', qty: '1 шт', cost });
             }
             if (isChecked('consTrashCheck')) {
-                totalConsumables += 20 * getNum('priceTrashBag');
+                const cost = 20 * getNum('priceTrashBag');
+                totalConsumables += cost;
+                consItems.push({ name: 'Мешки для мусора', qty: '20 шт', cost });
             }
             if (isChecked('consTapeCheck')) {
-                totalConsumables += 3 * getNum('priceTape');
+                const cost = 3 * getNum('priceTape');
+                totalConsumables += cost;
+                consItems.push({ name: 'Лента малярная 50 мм×40 м', qty: '3 шт', cost });
             }
 
             // === ИТОГО ===
             const grandTotal = totalWork + totalMaterials + totalConsumables;
 
-            // === ВЫВОД ===
+            // === СОХРАНЯЕМ РЕЗУЛЬТАТ (единый источник данных для отправки/Word) ===
+            lastResult = {
+                surfacesCount: surfaces.length,
+                totalPm, totalArea,
+                workItems, matItems, consItems,
+                totalWork, totalMaterials, totalConsumables, grandTotal
+            };
+
+            // === ВЫВОД НА ЭКРАН ===
             document.getElementById('resSurfaces').textContent = surfaces.length + ' шт';
             document.getElementById('resPerimeter').textContent = totalPm.toFixed(2) + ' п.м.';
             document.getElementById('resArea').textContent = totalArea.toFixed(2) + ' м²';
@@ -1157,121 +1186,168 @@
             document.getElementById('resConsumables').textContent = totalConsumables.toLocaleString('ru-RU') + ' ₽';
             document.getElementById('resTotal').textContent = grandTotal.toLocaleString('ru-RU') + ' ₽';
 
-            document.getElementById('materialsBody').innerHTML = matHtml;
-            document.getElementById('worksBody').innerHTML = workHtml;
+            document.getElementById('materialsBody').innerHTML = matItems.map(i =>
+                `<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.cost.toLocaleString('ru-RU')} ₽</td></tr>`
+            ).join('');
+            document.getElementById('worksBody').innerHTML = workItems.map(i =>
+                `<tr><td>${i.name}</td><td>${i.qty}</td><td>${i.cost.toLocaleString('ru-RU')} ₽</td></tr>`
+            ).join('');
+        }
+
+        function getClientInfo() {
+            return {
+                client: document.getElementById('clientName').value || '—',
+                address: document.getElementById('clientAddress').value || '—',
+                date: document.getElementById('estimateDate').value
+                    ? new Date(document.getElementById('estimateDate').value).toLocaleDateString('ru-RU')
+                    : new Date().toLocaleDateString('ru-RU')
+            };
         }
 
         function shareEstimate() {
-            let totalPm = 0;
-            let totalArea = 0;
-            surfaces.forEach(s => {
-                totalPm += s.pm;
-                totalArea += s.area;
+            if (!lastResult) return;
+            const { client, address, date } = getClientInfo();
+            const r = lastResult;
+
+            let text = `📐 СМЕТА ЦОКОЛЬ / ФАСАД\n`;
+            text += `Клиент: ${client}\n`;
+            text += `Адрес: ${address}\n`;
+            text += `Дата: ${date}\n`;
+            text += `\n📏 ПАРАМЕТРЫ ОБЪЕКТА\n`;
+            text += `Плоскостей: ${r.surfacesCount} шт\n`;
+            text += `Периметр: ${r.totalPm.toFixed(2)} п.м.\n`;
+            text += `Площадь: ${r.totalArea.toFixed(2)} м²\n`;
+
+            text += `\n🔧 РАБОТЫ\n`;
+            r.workItems.forEach(i => {
+                text += `• ${i.name}: ${i.qty} — ${i.cost.toLocaleString('ru-RU')} ₽\n`;
             });
+            text += `Итого работа: ${r.totalWork.toLocaleString('ru-RU')} ₽\n`;
 
-            const client = document.getElementById('clientName').value || '—';
-            const address = document.getElementById('clientAddress').value || '—';
-            const date = document.getElementById('estimateDate').value || new Date().toLocaleDateString('ru-RU');
-
-            let text = `📐 СМЕТА ЦОКОЛЬ / ФАСАД
-`;
-            text += `Клиент: ${client}
-`;
-            text += `Адрес: ${address}
-`;
-            text += `Дата: ${date}
-`;
-            text += `
-📏 ПАРАМЕТРЫ ОБЪЕКТА
-`;
-            text += `Плоскостей: ${surfaces.length} шт
-`;
-            text += `Периметр: ${totalPm.toFixed(2)} п.м.
-`;
-            text += `Площадь: ${totalArea.toFixed(2)} м²
-`;
-
-            // Работы
-            text += `
-🔧 РАБОТЫ
-`;
-            let totalWork = 0;
-            const workItems = [
-                {check: 'workPrepCheck', name: 'Подготовка поверхности', priceId: 'pricePrep'},
-                {check: 'workCleanCheck', name: 'Очистка + грунтовка', priceId: 'priceClean'},
-                {check: 'workLevelCheck', name: 'Выравнивание', priceId: 'priceLevel'},
-                {check: 'workHydroCheck', name: 'Гидрофобизация', priceId: 'priceHydro'},
-                {check: 'workEppCheck', name: 'Монтаж ЭППС', priceId: 'priceEpp'},
-                {check: 'workProfileVertCheck', name: 'Монтаж профилей (вертикальные)', priceId: 'priceProfileVert'},
-            {check: 'workProfileHorizCheck', name: 'Монтаж профилей (горизонтальные)', priceId: 'priceProfileHoriz'},
-                {check: 'workArmCheck', name: 'Армирование', priceId: 'priceArm'},
-                {check: 'workQuartzCheck', name: 'Кварцевая грунтовка', priceId: 'priceQuartz'},
-                {check: 'workFinishCheck', name: 'Мозаика / штукатурка', priceId: 'priceFinish'}
-            ];
-
-            workItems.forEach(item => {
-                if (isChecked(item.check)) {
-                    const price = getNum(item.priceId);
-                    const cost = totalPm * price;
-                    totalWork += cost;
-                    text += `• ${item.name}: ${totalPm.toFixed(2)} п.м. × ${price} ₽ = ${cost.toLocaleString('ru-RU')} ₽
-`;
-                }
+            text += `\n📦 МАТЕРИАЛЫ\n`;
+            r.matItems.forEach(i => {
+                text += `• ${i.name}: ${i.qty} — ${i.cost.toLocaleString('ru-RU')} ₽\n`;
             });
+            text += `Итого материалы: ${r.totalMaterials.toLocaleString('ru-RU')} ₽\n`;
 
-            // Откосы в отправке
-            let shareOtkosPm = 0;
-            otkosList.forEach(o => { shareOtkosPm += o.pm; });
-            if (isChecked('workOtkosCheck') && shareOtkosPm > 0) {
-                const otkosPrice = getNum('priceOtkos');
-                const otkosCost = shareOtkosPm * otkosPrice;
-                totalWork += otkosCost;
-                text += `• Формирование откосов: ${shareOtkosPm.toFixed(2)} п.м. × ${otkosPrice} ₽ = ${otkosCost.toLocaleString('ru-RU')} ₽
-`;
+            if (r.totalConsumables > 0) {
+                text += `\n🛠 РАСХОДНИКИ: ${r.totalConsumables.toLocaleString('ru-RU')} ₽\n`;
             }
 
-            text += `Итого работа: ${totalWork.toLocaleString('ru-RU')} ₽
-`;
-
-            // Материалы
-            text += `
-📦 МАТЕРИАЛЫ
-`;
-            document.querySelectorAll('#materialsBody tr').forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length === 3) {
-                    text += `• ${cells[0].textContent}: ${cells[1].textContent} — ${cells[2].textContent}
-`;
-                }
-            });
-            text += `Итого материалы: ${parseInt(document.getElementById('resMaterials').textContent.replace(/[^0-9]/g, ''))} ₽
-`;
-
-            // Расходники
-            const totalCons = parseInt(document.getElementById('resConsumables').textContent.replace(/[^0-9]/g, ''));
-            if (totalCons > 0) {
-                text += `
-🛠 РАСХОДНИКИ: ${totalCons.toLocaleString('ru-RU')} ₽
-`;
-            }
-
-            // Итого
-            const grandTotal = parseInt(document.getElementById('resTotal').textContent.replace(/[^0-9]/g, ''));
-            text += `
-💰 ИТОГО: ${grandTotal.toLocaleString('ru-RU')} ₽
-`;
+            text += `\n💰 ИТОГО: ${r.grandTotal.toLocaleString('ru-RU')} ₽\n`;
 
             const shareDiv = document.getElementById('shareText');
             shareDiv.textContent = text;
             shareDiv.style.display = 'block';
 
-            // Копируем в буфер
             navigator.clipboard.writeText(text).then(() => {
-                alert('Смета скопирована! Вставь в WhatsApp / Telegram');
+                // текст скопирован молча, основное действие — скачивание Word ниже
             }).catch(() => {
-                // Fallback
                 shareDiv.select?.();
             });
+
+            generateDocx();
+        }
+
+        async function generateDocx() {
+            if (!lastResult || typeof docx === 'undefined') {
+                alert('Не удалось сформировать Word-файл. Проверь интернет-соединение и обнови страницу.');
+                return;
+            }
+            const { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, Packer, BorderStyle } = docx;
+            const { client, address, date } = getClientInfo();
+            const r = lastResult;
+
+            const cellBorder = {
+                top: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                left: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                right: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' }
+            };
+
+            function headerCell(text) {
+                return new TableCell({
+                    borders: cellBorder,
+                    shading: { fill: 'C41E3A' },
+                    children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: 'FFFFFF' })] })]
+                });
+            }
+            function cell(text, alignRight) {
+                return new TableCell({
+                    borders: cellBorder,
+                    children: [new Paragraph({ alignment: alignRight ? AlignmentType.RIGHT : AlignmentType.LEFT, children: [new TextRun(String(text))] })]
+                });
+            }
+
+            function itemsTable(items, totalLabel, totalValue) {
+                const rows = [
+                    new TableRow({ children: [headerCell('Наименование'), headerCell('Объём'), headerCell('Сумма')] })
+                ];
+                items.forEach(i => {
+                    rows.push(new TableRow({ children: [cell(i.name), cell(i.qty), cell(i.cost.toLocaleString('ru-RU') + ' ₽', true)] }));
+                });
+                rows.push(new TableRow({
+                    children: [
+                        new TableCell({ borders: cellBorder, columnSpan: 2, children: [new Paragraph({ children: [new TextRun({ text: totalLabel, bold: true })] })] }),
+                        new TableCell({ borders: cellBorder, children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: totalValue.toLocaleString('ru-RU') + ' ₽', bold: true })] })] })
+                    ]
+                }));
+                return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows });
+            }
+
+            const children = [
+                new Paragraph({ heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, children: [new TextRun('СМЕТА ЦОКОЛЬ / ФАСАД')] }),
+                new Paragraph({ text: '' }),
+                new Paragraph({ children: [new TextRun({ text: 'Клиент: ', bold: true }), new TextRun(client)] }),
+                new Paragraph({ children: [new TextRun({ text: 'Адрес объекта: ', bold: true }), new TextRun(address)] }),
+                new Paragraph({ children: [new TextRun({ text: 'Дата: ', bold: true }), new TextRun(date)] }),
+                new Paragraph({ text: '' }),
+                new Paragraph({ children: [new TextRun({ text: 'Плоскостей: ', bold: true }), new TextRun(`${r.surfacesCount} шт`)] }),
+                new Paragraph({ children: [new TextRun({ text: 'Периметр: ', bold: true }), new TextRun(`${r.totalPm.toFixed(2)} п.м.`)] }),
+                new Paragraph({ children: [new TextRun({ text: 'Площадь (с запасом 5 см): ', bold: true }), new TextRun(`${r.totalArea.toFixed(2)} м²`)] }),
+                new Paragraph({ text: '' }),
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('РАБОТЫ')] }),
+                itemsTable(r.workItems, 'Итого работа', r.totalWork),
+                new Paragraph({ text: '' }),
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('МАТЕРИАЛЫ')] }),
+                itemsTable(r.matItems, 'Итого материалы', r.totalMaterials)
+            ];
+
+            if (r.consItems.length > 0) {
+                children.push(
+                    new Paragraph({ text: '' }),
+                    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('РАСХОДНИКИ')] }),
+                    itemsTable(r.consItems, 'Итого расходники', r.totalConsumables)
+                );
+            }
+
+            children.push(
+                new Paragraph({ text: '' }),
+                new Paragraph({
+                    alignment: AlignmentType.RIGHT,
+                    children: [new TextRun({ text: `ИТОГО: ${r.grandTotal.toLocaleString('ru-RU')} ₽`, bold: true, size: 28 })]
+                }),
+                new Paragraph({ text: '' }),
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Церезит · Казань', color: '888888', size: 18 })] })
+            );
+
+            const doc = new Document({ sections: [{ children }] });
+
+            try {
+                const blob = await Packer.toBlob(doc);
+                const fileName = `Смета_${client.replace(/[^a-zA-Zа-яА-Я0-9]+/g, '_')}_${date.replace(/\./g, '-')}.docx`;
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error(e);
+                alert('Ошибка при создании Word-файла: ' + e.message);
+            }
         }
 
         function resetAll() {
