@@ -539,6 +539,15 @@
             </div>
 
             <div class="toggle-row">
+                <input type="checkbox" id="matAdjoinCheck" onchange="calculateAll()">
+                <label for="matAdjoinCheck">Профиль примыкания ПВХ с сеткой 2,4 м</label>
+                <div class="price-inline">
+                    <input type="number" id="priceAdjoin" value="130" oninput="calculateAll()">
+                    <span>₽/шт</span>
+                </div>
+            </div>
+
+            <div class="toggle-row">
                 <input type="checkbox" id="matDempferCheck" checked onchange="calculateAll()">
                 <label for="matDempferCheck">Демпферная лента 10 м</label>
                 <div class="price-inline">
@@ -571,6 +580,15 @@
                 <div class="price-inline">
                     <input type="number" id="priceSt77" value="11500" oninput="calculateAll()">
                     <span>₽/вед</span>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="matDeliveryCheck" checked onchange="calculateAll()">
+                <label for="matDeliveryCheck">Доставка материалов</label>
+                <div class="price-inline">
+                    <input type="number" id="priceDelivery" value="2500" oninput="calculateAll()">
+                    <span>₽</span>
                 </div>
             </div>
         </div>
@@ -1003,6 +1021,15 @@
                 matItems.push({ name: 'Угловые профили ПВХ со стеклосеткой 2,5 м (гориз.)', qty: `${horizCount} шт`, cost: horizCost });
             }
 
+            // Профиль примыкания (по метражу откосов)
+            if (isChecked('matAdjoinCheck')) {
+                const priceAdjoin = getNum('priceAdjoin');
+                const adjoinCount = Math.ceil(totalOtkosPm / 2.4);
+                const adjoinCost = adjoinCount * priceAdjoin;
+                totalMaterials += adjoinCost;
+                matItems.push({ name: 'Профиль примыкания ПВХ с сеткой 2,4 м', qty: `${adjoinCount} шт`, cost: adjoinCost });
+            }
+
             // Демпферная лента
             if (isChecked('matDempferCheck')) {
                 const dempferCount = Math.ceil(totalPm / 10);
@@ -1047,6 +1074,13 @@
                     totalMaterials += finishCost;
                     matItems.push({ name: finishName, qty: `${finishCount} вед`, cost: finishCost });
                 }
+            }
+
+            // Доставка (фиксированная сумма)
+            if (isChecked('matDeliveryCheck')) {
+                const deliveryCost = getNum('priceDelivery');
+                totalMaterials += deliveryCost;
+                matItems.push({ name: 'Доставка материалов', qty: '1 услуга', cost: deliveryCost });
             }
 
             // === РАБОТЫ (только отмеченные) ===
@@ -1387,6 +1421,7 @@
             document.getElementById('workOtkosCheck').checked = false;
             document.getElementById('matSt84Check').checked = false;
             document.getElementById('matCornerHorizCheck').checked = false;
+            document.getElementById('matAdjoinCheck').checked = false;
             document.getElementById('workProfileHorizCheck').checked = false;
 
             updateCount();
