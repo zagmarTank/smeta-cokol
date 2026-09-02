@@ -284,6 +284,14 @@
             font-size: 11px;
             color: #888;
         }
+        .toggle-row .price-inline select.unit-select {
+            font-size: 11px;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 3px 2px;
+            background: #fff;
+        }
 
         .fact-check {
             background: #f0fdf4;
@@ -378,21 +386,21 @@
                 <label for="workOtkosCheck">Формирование откосов</label>
                 <div class="price-inline">
                     <input type="number" id="priceOtkos" value="2000" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitOtkos" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
         </div>
 
         <!-- РАБОТЫ — ВСЕ С ГАЛОЧКАМИ -->
         <div class="card">
-            <h2>Работы (₽/п.м.)</h2>
+            <h2>Работы</h2>
 
             <div class="toggle-row">
                 <input type="checkbox" id="workPrepCheck" checked onchange="calculateAll()">
                 <label for="workPrepCheck">Подготовка поверхности</label>
                 <div class="price-inline">
                     <input type="number" id="pricePrep" value="100" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitPrep" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -401,7 +409,7 @@
                 <label for="workCleanCheck">Очистка + грунтовка</label>
                 <div class="price-inline">
                     <input type="number" id="priceClean" value="100" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitClean" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -410,7 +418,7 @@
                 <label for="workLevelCheck">Выравнивание</label>
                 <div class="price-inline">
                     <input type="number" id="priceLevel" value="200" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitLevel" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -419,7 +427,7 @@
                 <label for="workHydroCheck">Гидрофобизация</label>
                 <div class="price-inline">
                     <input type="number" id="priceHydro" value="400" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitHydro" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -428,7 +436,7 @@
                 <label for="workEppCheck">Монтаж ЭППС</label>
                 <div class="price-inline">
                     <input type="number" id="priceEpp" value="800" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitEpp" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -446,7 +454,7 @@
                 <label for="workProfileHorizCheck">Монтаж профилей (горизонтальные)</label>
                 <div class="price-inline">
                     <input type="number" id="priceProfileHoriz" value="200" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitProfileHoriz" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -455,7 +463,7 @@
                 <label for="workArmCheck">Армирование</label>
                 <div class="price-inline">
                     <input type="number" id="priceArm" value="1000" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitArm" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -464,7 +472,7 @@
                 <label for="workQuartzCheck">Кварцевая грунтовка</label>
                 <div class="price-inline">
                     <input type="number" id="priceQuartz" value="100" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitQuartz" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -473,7 +481,7 @@
                 <label for="workFinishCheck">Мозаика / штукатурка</label>
                 <div class="price-inline">
                     <input type="number" id="priceFinish" value="1500" oninput="calculateAll()">
-                    <span>₽/п.м.</span>
+                    <select id="unitFinish" class="unit-select" oninput="calculateAll()"><option value="pm" selected>₽/п.м.</option><option value="m2">₽/м²</option></select>
                 </div>
             </div>
 
@@ -1087,32 +1095,43 @@
             let totalWork = 0;
             const workItems = [];
 
+            function unitBasis(unitSelectId, pmVal, areaVal) {
+                const el = document.getElementById(unitSelectId);
+                const isM2 = el && el.value === 'm2';
+                return isM2 ? { qty: areaVal, label: 'м²' } : { qty: pmVal, label: 'п.м.' };
+            }
+
             if (isChecked('workPrepCheck')) {
-                const cost = totalPm * getNum('pricePrep');
+                const b = unitBasis('unitPrep', totalPm, totalArea);
+                const cost = b.qty * getNum('pricePrep');
                 totalWork += cost;
-                workItems.push({ name: 'Подготовка поверхности', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Подготовка поверхности', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workCleanCheck')) {
-                const cost = totalPm * getNum('priceClean');
+                const b = unitBasis('unitClean', totalPm, totalArea);
+                const cost = b.qty * getNum('priceClean');
                 totalWork += cost;
-                workItems.push({ name: 'Очистка + грунтовка', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Очистка + грунтовка', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workLevelCheck')) {
-                const cost = totalPm * getNum('priceLevel');
+                const b = unitBasis('unitLevel', totalPm, totalArea);
+                const cost = b.qty * getNum('priceLevel');
                 totalWork += cost;
-                workItems.push({ name: 'Выравнивание', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Выравнивание', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workHydroCheck')) {
-                const cost = totalPm * getNum('priceHydro');
+                const b = unitBasis('unitHydro', totalPm, totalArea);
+                const cost = b.qty * getNum('priceHydro');
                 totalWork += cost;
-                workItems.push({ name: 'Гидрофобизация', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Гидрофобизация', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workEppCheck')) {
-                const cost = totalPm * getNum('priceEpp');
+                const b = unitBasis('unitEpp', totalPm, totalArea);
+                const cost = b.qty * getNum('priceEpp');
                 totalWork += cost;
-                workItems.push({ name: 'Монтаж ЭППС', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Монтаж ЭППС', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
-            // Вертикальные профили — считаем от углов × высота
+            // Вертикальные профили — считаем от углов × высота (всегда линейно, выбора нет)
             if (isChecked('workProfileVertCheck')) {
                 let totalVertPm = 0;
                 surfaces.forEach(s => {
@@ -1123,31 +1142,36 @@
                 workItems.push({ name: 'Монтаж профилей (вертикальные)', qty: `${totalVertPm.toFixed(2)} п.м.`, cost });
             }
 
-            // Горизонтальные профили — считаем по периметру
+            // Горизонтальные профили
             if (isChecked('workProfileHorizCheck')) {
-                const cost = totalPm * getNum('priceProfileHoriz');
+                const b = unitBasis('unitProfileHoriz', totalPm, totalArea);
+                const cost = b.qty * getNum('priceProfileHoriz');
                 totalWork += cost;
-                workItems.push({ name: 'Монтаж профилей (горизонтальные)', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Монтаж профилей (горизонтальные)', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workArmCheck')) {
-                const cost = totalPm * getNum('priceArm');
+                const b = unitBasis('unitArm', totalPm, totalArea);
+                const cost = b.qty * getNum('priceArm');
                 totalWork += cost;
-                workItems.push({ name: 'Армирование', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Армирование', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workQuartzCheck')) {
-                const cost = totalPm * getNum('priceQuartz');
+                const b = unitBasis('unitQuartz', totalPm, totalArea);
+                const cost = b.qty * getNum('priceQuartz');
                 totalWork += cost;
-                workItems.push({ name: 'Кварцевая грунтовка', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Кварцевая грунтовка', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workFinishCheck')) {
-                const cost = totalPm * getNum('priceFinish');
+                const b = unitBasis('unitFinish', totalPm, totalArea);
+                const cost = b.qty * getNum('priceFinish');
                 totalWork += cost;
-                workItems.push({ name: 'Мозаика / штукатурка', qty: `${totalPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Мозаика / штукатурка', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
             if (isChecked('workOtkosCheck')) {
-                const cost = totalOtkosPm * getNum('priceOtkos');
+                const b = unitBasis('unitOtkos', totalOtkosPm, totalOtkosArea);
+                const cost = b.qty * getNum('priceOtkos');
                 totalWork += cost;
-                workItems.push({ name: 'Формирование откосов', qty: `${totalOtkosPm.toFixed(2)} п.м.`, cost });
+                workItems.push({ name: 'Формирование откосов', qty: `${b.qty.toFixed(2)} ${b.label}`, cost });
             }
 
             // === РАСХОДНИКИ (только отмеченные) ===
@@ -1423,6 +1447,9 @@
             document.getElementById('matCornerHorizCheck').checked = false;
             document.getElementById('matAdjoinCheck').checked = false;
             document.getElementById('workProfileHorizCheck').checked = false;
+
+            // Сброс единиц измерения обратно на п.м.
+            document.querySelectorAll('select.unit-select').forEach(sel => sel.value = 'pm');
 
             updateCount();
             calculateAll();
