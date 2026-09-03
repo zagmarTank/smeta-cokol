@@ -741,6 +741,12 @@
         <button class="btn btn-share" onclick="shareEstimate()">📤 Отправить смету заказчику (Word)</button>
         <div class="share-text" id="shareText"></div>
 
+        <div id="yandexStatusBar" style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding:8px 10px; background:#f5f5f5; border-radius:8px; font-size:12px;">
+            <span id="yandexStatusText" style="color:#888;">☁️ Яндекс.Диск: не подключен</span>
+            <button id="yandexLoginBtn" onclick="loginYandex()" style="border:none; background:#ffcc00; color:#000; padding:6px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Войти</button>
+            <button id="yandexLogoutBtn" onclick="logoutYandex()" style="display:none; border:none; background:none; color:#c00; font-size:12px; cursor:pointer;">Выйти</button>
+        </div>
+
         <div style="display:flex; gap:8px; margin-top:10px;">
             <button class="btn" style="background:#4a6fa5; color:#fff; flex:1;" onclick="saveCurrentEstimate()">💾 Сохранить смету</button>
             <button class="btn" style="background:#6c757d; color:#fff; flex:1;" onclick="openSavedPanel()">📂 Мои сметы</button>
@@ -756,7 +762,7 @@
     <div id="savedOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:flex-start; justify-content:center; overflow-y:auto; padding:20px 10px;">
         <div style="background:#fff; border-radius:12px; max-width:500px; width:100%; padding:16px; margin-top:20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <h3 style="margin:0;">📂 Сохранённые сметы</h3>
+                <h3 style="margin:0;">📂 Сохранённые сметы (Яндекс.Диск)</h3>
                 <button onclick="closeSavedPanel()" style="border:none; background:none; font-size:22px; cursor:pointer; line-height:1;">✕</button>
             </div>
             <div id="savedList"></div>
@@ -1439,24 +1445,92 @@
             }
         }
 
-        // ============ СОХРАНЕНИЕ СМЕТ (localStorage) ============
-        const STORAGE_KEY = 'smeta_cokol_saved_v1';
+        // ============ ЯНДЕКС.ДИСК: ХРАНЕНИЕ СМЕТ ============
+        const YANDEX_CLIENT_ID = '5fa347b9066e446bafb0e0c1e05b4bcc';
+        const YANDEX_TOKEN_KEY = 'yandexDiskToken_v1';
+        const YANDEX_API = 'https://cloud-api.yandex.net/v1/disk';
 
-        function loadSavedEstimates() {
+        function getYandexToken() {
             try {
-                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+                const raw = localStorage.getItem(YANDEX_TOKEN_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (!data.token || !data.expires || Date.now() > data.expires) return null;
+                return data.token;
             } catch (e) {
-                return {};
+                return null;
             }
         }
 
-        function persistSavedEstimates(data) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        function setYandexToken(token, expiresInSec) {
+            localStorage.setItem(YANDEX_TOKEN_KEY, JSON.stringify({
+                token,
+                expires: Date.now() + (expiresInSec || 0) * 1000
+            }));
         }
 
-        function estimateKey(client, address) {
-            const base = (client && client.trim()) ? client.trim() : (address && address.trim()) ? address.trim() : 'Без имени';
-            return base.toLowerCase();
+        function clearYandexToken() {
+            localStorage.removeItem(YANDEX_TOKEN_KEY);
+        }
+
+        function loginYandex() {
+            const redirect = window.location.origin + window.location.pathname;
+            window.location.href = `https://oauth.yandex.ru/authorize?response_type=token&client_id=${YANDEX_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirect)}`;
+        }
+
+        function logoutYandex() {
+            if (!confirm('Отключить Яндекс.Диск? Сохранённые сметы на Диске никуда не денутся.')) return;
+            clearYandexToken();
+            updateYandexStatusBar();
+        }
+
+        function captureYandexTokenFromHash() {
+            if (window.location.hash && window.location.hash.includes('access_token=')) {
+                const params = new URLSearchParams(window.location.hash.slice(1));
+                const token = params.get('access_token');
+                const expiresIn = parseInt(params.get('expires_in')) || 0;
+                if (token) {
+                    setYandexToken(token, expiresIn);
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
+                }
+            }
+        }
+
+        function updateYandexStatusBar() {
+            const token = getYandexToken();
+            const statusText = document.getElementById('yandexStatusText');
+            const loginBtn = document.getElementById('yandexLoginBtn');
+            const logoutBtn = document.getElementById('yandexLogoutBtn');
+            if (token) {
+                statusText.textContent = '☁️ Яндекс.Диск: подключен';
+                statusText.style.color = '#2a8a2a';
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                statusText.textContent = '☁️ Яндекс.Диск: не подключен';
+                statusText.style.color = '#888';
+                loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        async function yandexApi(path, options) {
+            const token = getYandexToken();
+            if (!token) throw new Error('NO_TOKEN');
+            const res = await fetch(YANDEX_API + path, {
+                ...options,
+                headers: { 'Authorization': 'OAuth ' + token, ...(options && options.headers) }
+            });
+            if (res.status === 401) {
+                clearYandexToken();
+                updateYandexStatusBar();
+                throw new Error('Сессия Яндекс.Диска истекла, войди заново');
+            }
+            return res;
+        }
+
+        function sanitizeFileName(name) {
+            return (name || 'Без_имени').trim().replace(/[\\/:*?"<>|]+/g, '_').slice(0, 80) || 'Без_имени';
         }
 
         function collectFormState() {
@@ -1488,7 +1562,11 @@
             });
         }
 
-        function saveCurrentEstimate() {
+        async function saveCurrentEstimate() {
+            if (!getYandexToken()) {
+                alert('Сначала войди через Яндекс.Диск (кнопка "Войти" сверху).');
+                return;
+            }
             calculateAll();
             const client = document.getElementById('clientName').value.trim();
             const address = document.getElementById('clientAddress').value.trim();
@@ -1499,10 +1577,10 @@
                 return;
             }
 
-            const key = estimateKey(client, address);
-            const data = loadSavedEstimates();
+            const fileName = sanitizeFileName(client || address) + '.json';
+            const path = 'app:/' + fileName;
 
-            data[key] = {
+            const payload = {
                 client, address, date,
                 surfaces: surfaces.map(s => ({ length: s.length, height: s.height, corners: s.corners })),
                 otkosList: otkosList.map(o => ({ length: o.length, height: o.height })),
@@ -1512,100 +1590,156 @@
                 savedAt: Date.now()
             };
 
-            persistSavedEstimates(data);
-            alert(`Смета сохранена: ${client || address}${data[key].grandTotal ? ' — ' + data[key].grandTotal.toLocaleString('ru-RU') + ' ₽' : ''}\nПри повторном сохранении с тем же именем клиента она будет перезаписана.`);
+            try {
+                // 1. Получаем ссылку для загрузки (overwrite=true — перезапишет, если файл с таким именем уже есть)
+                const uploadUrlRes = await yandexApi(`/resources/upload?path=${encodeURIComponent(path)}&overwrite=true`, { method: 'GET' });
+                if (!uploadUrlRes.ok) throw new Error('Не удалось получить ссылку для загрузки (' + uploadUrlRes.status + ')');
+                const uploadData = await uploadUrlRes.json();
+
+                // 2. Заливаем содержимое файла
+                const putRes = await fetch(uploadData.href, {
+                    method: uploadData.method || 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                if (!putRes.ok && putRes.status !== 201) throw new Error('Ошибка загрузки файла (' + putRes.status + ')');
+
+                // 3. Прикрепляем краткие данные как метаданные — чтобы список смет открывался быстро, без скачивания каждого файла
+                await yandexApi(`/resources?path=${encodeURIComponent(path)}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        custom_properties: { client, address, grandTotal: payload.grandTotal, savedAt: payload.savedAt }
+                    })
+                });
+
+                alert(`Смета сохранена на Яндекс.Диск: ${client || address}${payload.grandTotal ? ' — ' + payload.grandTotal.toLocaleString('ru-RU') + ' ₽' : ''}\nПри повторном сохранении с тем же именем клиента она будет перезаписана.`);
+            } catch (e) {
+                console.error(e);
+                alert('Не удалось сохранить на Яндекс.Диск: ' + e.message);
+            }
         }
 
         function openSavedPanel() {
-            renderSavedList();
+            if (!getYandexToken()) {
+                alert('Сначала войди через Яндекс.Диск (кнопка "Войти" сверху).');
+                return;
+            }
             document.getElementById('savedOverlay').style.display = 'flex';
+            renderSavedList();
         }
 
         function closeSavedPanel() {
             document.getElementById('savedOverlay').style.display = 'none';
         }
 
-        function renderSavedList() {
-            const data = loadSavedEstimates();
-            const keys = Object.keys(data).sort((a, b) => (data[b].savedAt || 0) - (data[a].savedAt || 0));
+        async function renderSavedList() {
             const listEl = document.getElementById('savedList');
+            listEl.innerHTML = '<p style="color:#888; text-align:center;">Загрузка…</p>';
 
-            if (keys.length === 0) {
-                listEl.innerHTML = '<p style="color:#888; text-align:center;">Пока нет сохранённых смет</p>';
-                return;
+            try {
+                const res = await yandexApi(`/resources?path=app:/&limit=200&fields=_embedded.items.name,_embedded.items.path,_embedded.items.custom_properties,_embedded.items.modified`, { method: 'GET' });
+                if (!res.ok) throw new Error('Ошибка чтения списка (' + res.status + ')');
+                const data = await res.json();
+                const items = (data._embedded && data._embedded.items || []).filter(i => i.name.endsWith('.json'));
+
+                if (items.length === 0) {
+                    listEl.innerHTML = '<p style="color:#888; text-align:center;">Пока нет сохранённых смет</p>';
+                    return;
+                }
+
+                items.sort((a, b) => {
+                    const sa = (a.custom_properties && a.custom_properties.savedAt) || 0;
+                    const sb = (b.custom_properties && b.custom_properties.savedAt) || 0;
+                    return sb - sa;
+                });
+
+                listEl.innerHTML = items.map(item => {
+                    const cp = item.custom_properties || {};
+                    const client = cp.client || item.name.replace('.json', '');
+                    const address = cp.address || '';
+                    const total = cp.grandTotal || 0;
+                    const savedAt = cp.savedAt ? new Date(cp.savedAt) : (item.modified ? new Date(item.modified) : null);
+                    const dateStr = savedAt ? savedAt.toLocaleDateString('ru-RU') + ' ' + savedAt.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
+                    const pathEsc = item.path.replace(/'/g, "\\'");
+                    return `
+                    <div style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px;">
+                        <div style="font-weight:600;">${client}</div>
+                        <div style="font-size:13px; color:#666;">${address}</div>
+                        <div style="font-size:12px; color:#999;">Сохранено: ${dateStr}</div>
+                        <div style="font-weight:600; margin:6px 0;">${total.toLocaleString('ru-RU')} ₽</div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" style="background:#4a6fa5; color:#fff; flex:1; padding:8px;" onclick="loadSavedEstimate('${pathEsc}')">Открыть</button>
+                            <button class="btn btn-danger" style="flex:1; padding:8px;" onclick="deleteSavedEstimate('${pathEsc}')">Удалить</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                console.error(e);
+                listEl.innerHTML = `<p style="color:#c00; text-align:center;">Не удалось загрузить список: ${e.message}</p>`;
             }
-
-            listEl.innerHTML = keys.map(key => {
-                const e = data[key];
-                const dateStr = e.savedAt ? new Date(e.savedAt).toLocaleDateString('ru-RU') + ' ' + new Date(e.savedAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '';
-                return `
-                <div style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:8px;">
-                    <div style="font-weight:600;">${e.client || '—'}</div>
-                    <div style="font-size:13px; color:#666;">${e.address || ''}</div>
-                    <div style="font-size:12px; color:#999;">Сохранено: ${dateStr}</div>
-                    <div style="font-weight:600; margin:6px 0;">${(e.grandTotal || 0).toLocaleString('ru-RU')} ₽</div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" style="background:#4a6fa5; color:#fff; flex:1; padding:8px;" onclick="loadSavedEstimate('${key.replace(/'/g, "\\'")}')">Открыть</button>
-                        <button class="btn btn-danger" style="flex:1; padding:8px;" onclick="deleteSavedEstimate('${key.replace(/'/g, "\\'")}')">Удалить</button>
-                    </div>
-                </div>`;
-            }).join('');
         }
 
-        function loadSavedEstimate(key) {
-            const data = loadSavedEstimates();
-            const e = data[key];
-            if (!e) return;
+        async function loadSavedEstimate(path) {
+            try {
+                const linkRes = await yandexApi(`/resources/download?path=${encodeURIComponent(path)}`, { method: 'GET' });
+                if (!linkRes.ok) throw new Error('Не удалось получить ссылку на файл (' + linkRes.status + ')');
+                const linkData = await linkRes.json();
 
-            // Очищаем текущие плоскости и откосы
-            surfaces = [];
-            nextId = 1;
-            document.getElementById('surfacesList').innerHTML = '';
-            otkosList = [];
-            otkosNextId = 1;
-            document.getElementById('otkosList').innerHTML = '';
+                const fileRes = await fetch(linkData.href);
+                if (!fileRes.ok) throw new Error('Не удалось скачать файл (' + fileRes.status + ')');
+                const e = await fileRes.json();
 
-            // Клиент
-            document.getElementById('clientName').value = e.client || '';
-            document.getElementById('clientAddress').value = e.address || '';
-            document.getElementById('estimateDate').value = e.date || '';
+                // Очищаем текущие плоскости и откосы
+                surfaces = [];
+                nextId = 1;
+                document.getElementById('surfacesList').innerHTML = '';
+                otkosList = [];
+                otkosNextId = 1;
+                document.getElementById('otkosList').innerHTML = '';
 
-            // Плоскости
-            (e.surfaces || []).forEach(s => {
-                addSurface();
-                const id = nextId - 1;
-                document.getElementById(`len-${id}`).value = s.length;
-                document.getElementById(`height-${id}`).value = s.height;
-                document.getElementById(`corners-${id}`).value = s.corners;
-                updateSurface(id);
-            });
+                document.getElementById('clientName').value = e.client || '';
+                document.getElementById('clientAddress').value = e.address || '';
+                document.getElementById('estimateDate').value = e.date || '';
 
-            // Откосы
-            (e.otkosList || []).forEach(o => {
-                addOtkos();
-                const id = otkosNextId - 1;
-                document.getElementById(`otkos-len-${id}`).value = o.length;
-                document.getElementById(`otkos-height-${id}`).value = o.height;
-                updateOtkos(id);
-            });
+                (e.surfaces || []).forEach(s => {
+                    addSurface();
+                    const id = nextId - 1;
+                    document.getElementById(`len-${id}`).value = s.length;
+                    document.getElementById(`height-${id}`).value = s.height;
+                    document.getElementById(`corners-${id}`).value = s.corners;
+                    updateSurface(id);
+                });
 
-            // Система/цвет отделки
-            if (e.currentSystem) selectSystem(e.currentSystem);
-            if (e.currentColor) selectColor(e.currentColor);
+                (e.otkosList || []).forEach(o => {
+                    addOtkos();
+                    const id = otkosNextId - 1;
+                    document.getElementById(`otkos-len-${id}`).value = o.length;
+                    document.getElementById(`otkos-height-${id}`).value = o.height;
+                    updateOtkos(id);
+                });
 
-            // Все цены, галочки, единицы измерения
-            applyFormState(e.formState);
+                if (e.currentSystem) selectSystem(e.currentSystem);
+                if (e.currentColor) selectColor(e.currentColor);
 
-            calculateAll();
-            closeSavedPanel();
+                applyFormState(e.formState);
+
+                calculateAll();
+                closeSavedPanel();
+            } catch (err) {
+                console.error(err);
+                alert('Не удалось открыть смету: ' + err.message + '\n\nЭто может быть временная проблема с доступом браузера к файлам Диска — попробуй ещё раз, если не поможет — напиши мне.');
+            }
         }
 
-        function deleteSavedEstimate(key) {
-            if (!confirm('Удалить эту смету из сохранённых?')) return;
-            const data = loadSavedEstimates();
-            delete data[key];
-            persistSavedEstimates(data);
-            renderSavedList();
+        async function deleteSavedEstimate(path) {
+            if (!confirm('Удалить эту смету с Яндекс.Диска?')) return;
+            try {
+                const res = await yandexApi(`/resources?path=${encodeURIComponent(path)}&permanently=true`, { method: 'DELETE' });
+                if (!res.ok && res.status !== 204) throw new Error('Ошибка удаления (' + res.status + ')');
+                renderSavedList();
+            } catch (e) {
+                alert('Не удалось удалить: ' + e.message);
+            }
         }
 
         function resetAll() {
@@ -1641,6 +1775,8 @@
 
         document.getElementById('estimateDate').valueAsDate = new Date();
         addSurface();
+        captureYandexTokenFromHash();
+        updateYandexStatusBar();
     </script>
 </body>
 </html>
