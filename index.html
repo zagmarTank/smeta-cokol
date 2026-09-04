@@ -1447,6 +1447,7 @@
 
         // ============ ЯНДЕКС.ДИСК: ХРАНЕНИЕ СМЕТ ============
         const YANDEX_CLIENT_ID = '5fa347b9066e446bafb0e0c1e05b4bcc';
+        const YANDEX_PROXY = 'https://smeta-proxy.maratant40.workers.dev';
         const YANDEX_TOKEN_KEY = 'yandexDiskToken_v1';
         const YANDEX_API = 'https://cloud-api.yandex.net/v1/disk';
 
@@ -1685,8 +1686,8 @@
                 if (!linkRes.ok) throw new Error('Не удалось получить ссылку на файл (' + linkRes.status + ')');
                 const linkData = await linkRes.json();
 
-                const fileRes = await fetch(linkData.href);
-                if (!fileRes.ok) throw new Error('Не удалось скачать файл (' + fileRes.status + ')');
+                const fileRes = await fetch(YANDEX_PROXY + '?url=' + encodeURIComponent(linkData.href));
+                if (!fileRes.ok) throw new Error('Не удалось скачать файл через прокси (' + fileRes.status + ')');
                 const e = await fileRes.json();
 
                 // Очищаем текущие плоскости и откосы
